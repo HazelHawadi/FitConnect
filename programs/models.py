@@ -39,3 +39,17 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.program.title}"
+
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    program = models.ForeignKey('Program', on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveIntegerField(choices=[(i, i) for i in range(1, 6)])  # 1 to 5 stars
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'program')  # one review per user per program
+
+    def __str__(self):
+        return f"{self.user.username} review on {self.program.title}"

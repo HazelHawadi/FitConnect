@@ -186,3 +186,106 @@ img {
 .card {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
+
+.rounded-circle {
+    margin-top: 50px;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+}
+
+/* Reviews section styles */
+.reviews-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.reviews-section h4 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Review card styles */
+.review-card {
+    background-color: #ffffff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.review-card strong {
+    font-size: 16px;
+    color: #333;
+}
+
+.review-card p {
+    font-size: 14px;
+    color: #555;
+}
+
+.review-card .rating {
+    font-size: 18px;
+    color: #ffb400;
+}
+
+.review-card .actions {
+    margin-top: 10px;
+}
+
+/* Button styles */
+.btn-review {
+    padding: 8px 20px;
+    font-size: 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-review:hover {
+    background-color: #0056b3;
+    color: #fff;
+}
+
+/* Edit/Delete button styles */
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-warning {
+    background-color: #f0ad4e;
+    border-color: #f0ad4e;
+}
+
+.btn-warning:hover {
+    background-color: #ec971f;
+}
+
+.btn-danger {
+    background-color: #d9534f;
+    border-color: #d9534f;
+}
+
+.btn-danger:hover {
+    background-color: #c9302c;
+}
+
+/* Leave a Review / Edit Review Button */
+.btn-outline-primary {
+    color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0056b3;
+    color: white;
+    border-color: #0056b3;
+}
+

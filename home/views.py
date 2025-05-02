@@ -1,7 +1,7 @@
 from django.shortcuts import render
+from programs.models import Program
 
-# Create your views here.
 
-def index(request):
-    
-    return render(request, 'home/index.html')
+def home(request):
+    programs = Program.objects.all()
+    return render(request, 'home/index.html', {'programs': programs})
