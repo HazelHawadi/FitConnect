@@ -79,18 +79,27 @@ def delete_review(request, program_id):
     return render(request, 'programs/confirm_delete_review.html', {'review': review})
 
 
-def confirm_booking(request):
-    booking_data = request.session.get('booking_data')
-    if not booking_data:
-        return redirect('home')
+def confirm_booking(request, program_id):
+    if request.method == 'POST':
+        program = get_object_or_404(Program, pk=program_id)
+        date_id = request.POST.get('date')
+        sessions = int(request.POST.get('sessions', 1))
+        date = get_object_or_404(AvailableDate, pk=date_id)
 
-    program = get_object_or_404(Program, pk=booking_data['program_id'])
-    date = get_object_or_404(AvailableDate, pk=booking_data['date_id'])
+        total = sessions * program.price_per_session
 
-    return render(request, 'programs/confirm_booking.html', {
-        'program': program,
-        'date': date,
-        'sessions': booking_data['sessions'],
-        'total_cost': booking_data['total_cost'],
-        'stripe_public_key': settings.STRIPE_PUBLIC_KEY
-    })
+        request.session['booking_data'] = {
+            'program_id': program.id,
+            'date_id': date.id,
+            'sessions': sessions,
+            'total': float(total),
+        }
+
+        context = {
+            'program': program,
+            'date': date,
+            'sessions': sessions,
+            'total': total,
+        }
+        return render(request, 'programs/confirm_booking.html', context)
+    return redirect('home')
