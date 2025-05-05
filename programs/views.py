@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Program, AvailableDate, Booking, Review
 from django.contrib.auth.decorators import login_required
+from decimal import Decimal
 from .forms import ReviewForm
 
 
@@ -27,28 +28,28 @@ def program_detail(request, pk):
 @login_required
 def book_program(request, pk):
     program = get_object_or_404(Program, pk=pk)
+    available_dates = AvailableDate.objects.filter(program=program, is_booked=False)
 
     if request.method == 'POST':
         date_id = request.POST.get('date')
-        sessions = int(request.POST.get('sessions', 1))
-        selected_date = get_object_or_404(AvailableDate, pk=date_id)
+        sessions = int(request.POST.get('sessions'))
+        selected_date = get_object_or_404(AvailableDate, id=date_id)
 
-        total = sessions * float(program.price_per_session)
+        total_cost = sessions * program.price_per_session
 
-        booking = Booking.objects.create(
-            user=request.user,
-            program=program,
-            date=selected_date,
-            sessions=sessions,
-            total_cost=total,
-        )
+        request.session['booking_data'] = {
+            'program_id': program.id,
+            'date_id': selected_date.id,
+            'sessions': sessions,
+            'total_cost': float(total_cost),
+        }
 
-        selected_date.is_booked = True
-        selected_date.save()
+        return redirect('confirm_booking')
 
-        return redirect('stripe_checkout', booking_id=booking.id)
-
-    return redirect('program_detail', pk=pk)
+    return render(request, 'programs/book_program.html', {
+        'program': program,
+        'available_dates': available_dates,
+    })
 
 
 @login_required
@@ -76,3 +77,20 @@ def delete_review(request, program_id):
         review.delete()
         return redirect('program_detail', program_id=program_id)
     return render(request, 'programs/confirm_delete_review.html', {'review': review})
+
+
+def confirm_booking(request):
+    booking_data = request.session.get('booking_data')
+    if not booking_data:
+        return redirect('home')
+
+    program = get_object_or_404(Program, pk=booking_data['program_id'])
+    date = get_object_or_404(AvailableDate, pk=booking_data['date_id'])
+
+    return render(request, 'programs/confirm_booking.html', {
+        'program': program,
+        'date': date,
+        'sessions': booking_data['sessions'],
+        'total_cost': booking_data['total_cost'],
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY
+    })
