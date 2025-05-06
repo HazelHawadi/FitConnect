@@ -237,6 +237,25 @@ img {
     margin-top: 10px;
 }
 
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 2rem;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.star-rating input:checked ~ label {
+    color: gold;
+}
+
+.star-rating input:hover ~ label {
+    color: #ffcc00;
+}
+
 /* Button styles */
 .btn-review {
     padding: 8px 20px;
