@@ -16,4 +16,5 @@ urlpatterns = [
     path('booking/success/', views.booking_success, name='booking_success'),
     path('<int:program_id>/review/', views.add_review, name='add_review'),
     path('<int:program_id>/review/delete/', views.delete_review, name='delete_review'),
+    path('programs/', views.program_list, name='program_list'),
 ]

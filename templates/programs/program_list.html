@@ -1,0 +1,56 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Explore Our Programs</h2>
+    <p class="text-muted">
+      Browse through our fitness sessions tailored to your goals.
+    </p>
+  </div>
+
+  <div class="row">
+    {% for program in programs %}
+    <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up">
+      <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+        <img
+          src="{{ program.image.url }}"
+          class="card-img-top"
+          alt="{{ program.title }}"
+          style="height: 200px; object-fit: cover"
+        />
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-primary fw-bold">{{ program.title }}</h5>
+          <p class="card-text small text-muted">
+            {{ program.description|truncatewords:18 }}
+          </p>
+          <div class="mt-auto">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              {% if program.instructor %}
+              <small class="text-muted"
+                ><i class="fas fa-user"></i> {{ program.instructor }}</small
+              >
+              {% else %}
+              <small class="text-muted"
+                ><i class="fas fa-user-slash"></i> No instructor</small
+              >
+              {% endif %} {% if program.difficulty %}
+              <span class="badge bg-secondary">{{ program.difficulty }}</span>
+              {% endif %}
+            </div>
+            <a
+              href="{% url 'program_detail' program.id %}"
+              class="btn btn-outline-primary w-100"
+            >
+              View Program
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-muted">
+      No programs available at the moment. Please check back soon!
+    </p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

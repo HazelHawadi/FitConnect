@@ -190,3 +190,6 @@ def delete_review(request, program_id):
     return render(request, 'programs/confirm_delete_review.html', {'review': review})
 
 
+def program_list(request):
+    programs = Program.objects.all()
+    return render(request, 'programs/program_list.html', {'programs': programs})
