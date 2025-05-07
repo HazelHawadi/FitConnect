@@ -1,14 +1,21 @@
+# programs/models.py
+
 from django.db import models
 from django.contrib.auth.models import User
 
 
 class Instructor(models.Model):
-    name = models.CharField(max_length=100)
-    bio = models.TextField()
+    name = models.CharField(max_length=255)
     photo = models.ImageField(upload_to='instructors/')
+    bio = models.TextField()
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
+    email = models.EmailField(default='email@example.com')
+    phone = models.CharField(max_length=15, default='123-456-7890')
+    
 
     def __str__(self):
         return self.name
+
 
 class Program(models.Model):
     title = models.CharField(max_length=200)
@@ -20,6 +27,7 @@ class Program(models.Model):
     def __str__(self):
         return self.title
 
+
 class AvailableDate(models.Model):
     program = models.ForeignKey(Program, related_name='dates', on_delete=models.CASCADE)
     date = models.DateField()
@@ -27,6 +35,7 @@ class AvailableDate(models.Model):
 
     def __str__(self):
         return f"{self.program.title} on {self.date}"
+
 
 class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

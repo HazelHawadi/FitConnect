@@ -8,9 +8,23 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.views.generic import ListView, DetailView
+from .models import Instructor
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+class InstructorListView(ListView):
+    model = Instructor
+    template_name = 'programs/instructor_list.html'
+    context_object_name = 'instructors'
+    
+    
+class InstructorDetailView(DetailView):
+    model = Instructor
+    template_name = 'programs/instructor_detail.html'
+    context_object_name = 'instructor'
 
 
 def program_list(request):

@@ -308,3 +308,53 @@ img {
     border-color: #0056b3;
 }
 
+/* General container padding */
+.container {
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+/* Instructor list: card layout */
+.card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Instructor list image styling */
+.card-img-top {
+    height: 300px;
+    object-fit: fill;
+    background-color: #f8f9fa;
+}
+
+/* Instructor detail image */
+.img-fluid.rounded-circle {
+    width: 100%;
+    max-width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border: 5px solid #f0f0f0;
+}
+
+/* Stars (FontAwesome) */
+.fa-star,
+.fa-star-o {
+    color: #f5c518;
+    font-size: 1.2rem;
+    margin-right: 2px;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .img-fluid.rounded-circle {
+        margin: 0 auto;
+        display: block;
+    }
+}

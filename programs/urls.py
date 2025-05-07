@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import InstructorListView, InstructorDetailView
 from .views import (
     book_program,
     confirm_booking,
@@ -17,4 +18,6 @@ urlpatterns = [
     path('<int:program_id>/review/', views.add_review, name='add_review'),
     path('<int:program_id>/review/delete/', views.delete_review, name='delete_review'),
     path('programs/', views.program_list, name='program_list'),
+    path('instructors/', views.InstructorListView.as_view(), name='instructors_list'),
+    path('instructors/<int:pk>/', InstructorDetailView.as_view(), name='instructor_detail'),
 ]
