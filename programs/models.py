@@ -1,7 +1,6 @@
-# programs/models.py
-
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import time
 
 
 class Instructor(models.Model):
@@ -11,7 +10,6 @@ class Instructor(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
     email = models.EmailField(default='email@example.com')
     phone = models.CharField(max_length=15, default='123-456-7890')
-    
 
     def __str__(self):
         return self.name
@@ -41,6 +39,7 @@ class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
     date = models.ForeignKey(AvailableDate, on_delete=models.CASCADE)
+    time = models.TimeField(default=time(12, 0))
     sessions = models.IntegerField(default=1)
     total_cost = models.DecimalField(max_digits=8, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
