@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5">
@@ -27,3 +28,34 @@
   });
 </script>
 {% endblock %}
+=======
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h3>Booking Confirmed!</h3>
+    <p>Thank you for booking <strong>{{ booking.program.title }}</strong>.</p>
+    <p><strong>Instructor:</strong> {{ booking.program.instructor.name }}</p>
+    <p><strong>Date:</strong> {{ booking.date.date }}</p>
+    <p><strong>Sessions:</strong> {{ booking.sessions }}</p>
+    <p><strong>Total Paid:</strong> ${{ booking.total_cost }}</p>
+</div>
+
+<!-- EmailJS Script -->
+<script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script type="text/javascript">
+  (function(){
+      emailjs.init("your_emailjs_user_id");
+  })();
+
+  emailjs.send("your_service_id", "your_template_id", {
+      user_email: "{{ request.user.email }}",
+      user_name: "{{ request.user.username }}",
+      program_title: "{{ booking.program.title }}",
+      instructor: "{{ booking.program.instructor.name }}",
+      date: "{{ booking.date.date }}",
+      sessions: "{{ booking.sessions }}",
+      total: "{{ booking.total_cost }}"
+  });
+</script>
+{% endblock %}
+>>>>>>> ba34c1e (Installed required apps)

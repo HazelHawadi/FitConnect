@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'base.html' %}
 {% load range_filter %}
 
@@ -37,3 +38,44 @@
     </div>
 </div>
 {% endblock %}
+=======
+{% extends 'base.html' %}
+{% load range_filter %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">{{ instructor.name }}'s Profile</h2>
+
+    <!-- Instructor Profile Picture and Info -->
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Profile Picture -->
+            <img src="{{ instructor.photo.url }}" alt="{{ instructor.name }}" class="img-fluid rounded-circle shadow-lg mb-3">
+        </div>
+        <div class="col-md-8">
+            <!-- Instructor Name -->
+            <h3>{{ instructor.name }}</h3>
+            
+            <!-- Instructor Rating -->
+            <div class="mb-3">
+                <strong>Rating:</strong>
+                {% for i in 5|range_filter %}
+                    <span class="fa fa-star{% if forloop.counter > instructor.rating %}-o{% endif %}"></span>
+                {% endfor %}
+                <span class="text-muted">{{ instructor.rating }}</span>
+            </div>
+
+            <!-- Instructor Bio -->
+            <p><strong>Bio:</strong> {{ instructor.bio|default:"No bio available." }}</p>
+
+            <!-- Contact Info -->
+            <h5>Contact Information</h5>
+            <ul>
+                <li><strong>Email:</strong> {{ instructor.email|default:"No email provided." }}</li>
+                <li><strong>Phone:</strong> {{ instructor.phone|default:"No phone provided." }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+>>>>>>> ba34c1e (Installed required apps)

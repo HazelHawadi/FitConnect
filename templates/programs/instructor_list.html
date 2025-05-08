@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'base.html' %}
 
 {% block content %}
@@ -24,3 +25,31 @@
     {% endif %}
 </div>
 {% endblock %}
+=======
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4">Our Instructors</h2>
+
+    {% if instructors %}
+    <div class="row">
+        {% for instructor in instructors %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="{{ instructor.photo.url|default:'/static/img/placeholder.png' }}" alt="{{ instructor.name }}" class="card-img-top">
+                <div class="card-body">
+                    <h5 class="card-title">{{ instructor.name }}</h5>
+                    <p class="card-text">{{ instructor.bio|truncatewords:20 }}</p>
+                    <a href="{% url 'instructor_detail' instructor.id %}" class="btn btn-primary">View Profile</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-muted">No instructors available at the moment. Please check back later!</p>
+    {% endif %}
+</div>
+{% endblock %}
+>>>>>>> ba34c1e (Installed required apps)
