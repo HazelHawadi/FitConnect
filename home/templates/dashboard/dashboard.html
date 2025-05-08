@@ -10,7 +10,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
-                    <i class="bi bi-person-circle fs-1 text-primary"></i>
+                    <i class="bi bi-person-circle dashboard-icon text-primary"></i>
                     <h5 class="card-title mt-2">My Profile</h5>
                     <p class="card-text">{{ user.email }}</p>
                     <a href="{% url 'account_profile' %}" class="btn btn-outline-primary btn-sm">View / Edit Profile</a>
@@ -22,7 +22,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
-                    <i class="bi bi-calendar-event fs-1 text-success"></i>
+                    <i class="bi bi-calendar-event dashboard-icon text-success"></i>
                     <h5 class="card-title mt-2">Upcoming Bookings</h5>
                     {% if upcoming_bookings %}
                         <ul class="list-unstyled small mt-3">
@@ -42,7 +42,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
-                    <i class="bi bi-credit-card-2-back fs-1 text-warning"></i>
+                    <i class="bi bi-credit-card-2-back dashboard-icon text-warning"></i>
                     <h5 class="card-title mt-2">Subscription Plan</h5>
                     {% if subscription %}
                         <p class="mb-2"><strong>{{ subscription.plan_name }}</strong></p>

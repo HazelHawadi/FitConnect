@@ -351,6 +351,31 @@ img {
     margin-right: 2px;
 }
 
+/* Dashboard Page */
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.dashboard-icon {
+    font-size: 2.5rem;
+}
+
+/* Pricing Page */
+.card.pricing-card {
+    border: 2px solid #dee2e6;
+    transition: all 0.3s ease-in-out;
+}
+.card.pricing-card:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+.featured-plan {
+    border-color: #ffc107;
+    background-color: #fff9e6;
+}
+
 /* Responsive */
 @media (max-width: 767px) {
     .img-fluid.rounded-circle {

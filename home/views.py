@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from programs.models import Booking
 from .models import Subscription
 from datetime import date
+from django.utils import timezone
+from datetime import timedelta
 
 
 def home(request):
@@ -38,7 +40,7 @@ def user_dashboard(request):
 
 
 @login_required
-def account_profile(request):
+def profile(request):
     user = request.user
     try:
         subscription = user.subscription
@@ -50,3 +52,39 @@ def account_profile(request):
         'subscription': subscription,
     }
     return render(request, 'account/account_profile.html', context)
+
+
+@login_required
+def my_bookings(request):
+    user = request.user
+    bookings = user.bookings.all()
+    
+    context = {
+        'bookings': bookings,
+    }
+    return render(request, 'bookings/my_bookings.html', context)
+
+
+@login_required
+def pricing(request):
+    plans = [
+        {'name': 'Basic', 'price': '$10/month', 'duration_days': 30},
+        {'name': 'Pro', 'price': '$25/month', 'duration_days': 30},
+        {'name': 'Elite', 'price': '$50/month', 'duration_days': 30},
+    ]
+    return render(request, 'subscription/pricing.html', {'plans': plans})
+
+@login_required
+def subscribe(request, plan_name):
+    duration_days = 30
+    renewal_date = timezone.now().date() + timedelta(days=duration_days)
+
+    Subscription.objects.update_or_create(
+        user=request.user,
+        defaults={
+            'plan_name': plan_name,
+            'renewal_date': renewal_date,
+            'active': True,
+        }
+    )
+    return redirect('dashboard')

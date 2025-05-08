@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h2>User Profile</h2>
+        <div class="profile-details">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>First Name:</strong> {{ user.first_name }}</p>
+            <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+
+            {% if subscription %}
+                <p><strong>Subscription Plan:</strong> {{ subscription.plan_name }}</p>
+                <p><strong>Renewal Date:</strong> {{ subscription.renewal_date }}</p>
+            {% else %}
+                <p>You don't have an active subscription.</p>
+            {% endif %}
+        </div>
+
+        <div class="actions">
+            <a href="{% url 'account_update_profile' %}" class="btn btn-primary">Update Profile</a>
+            <a href="{% url 'account_change_password' %}" class="btn btn-secondary">Change Password</a>
+        </div>
+    </div>
+{% endblock %}
