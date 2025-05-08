@@ -8,3 +8,7 @@ def range_filter(value):
         return range(int(value))
     except (ValueError, TypeError):
         return []
+
+@register.filter(name='add_class')
+def add_class(value, arg):
+    return value.as_widget(attrs={'class': arg})

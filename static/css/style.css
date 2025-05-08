@@ -376,6 +376,52 @@ img {
     background-color: #fff9e6;
 }
 
+.form-control {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Error messages */
+.text-danger {
+    font-size: 0.9rem;
+    margin-top: 5px;
+    color: #d9534f;
+}
+
+/* Submit button */
+.btn-primary {
+    padding: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Success alert */
+.alert-success {
+    font-size: 0.95rem;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+
 /* Responsive */
 @media (max-width: 767px) {
     .img-fluid.rounded-circle {

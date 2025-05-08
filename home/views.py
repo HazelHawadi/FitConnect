@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from programs.models import Program
+from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from .forms import ProfileUpdateForm
 from programs.models import Booking
 from .models import Subscription
 from datetime import date
@@ -88,3 +91,17 @@ def subscribe(request, plan_name):
         }
     )
     return redirect('dashboard')
+
+
+@login_required
+def update_profile(request):
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.instance)
+            return redirect('profile')
+    else:
+        form = ProfileUpdateForm(instance=request.user)
+    
+    return render(request, 'account/update_profile.html', {'form': form})
