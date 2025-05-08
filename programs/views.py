@@ -171,11 +171,9 @@ def booking_success(request):
 def add_review(request, program_id):
     program = get_object_or_404(Program, pk=program_id)
 
-    # Check if the user has already reviewed the program
     existing_review = Review.objects.filter(user=request.user, program=program).first()
 
     if existing_review:
-        # If the review already exists, update it
         if request.method == 'POST':
             existing_review.rating = request.POST.get('rating')
             existing_review.comment = request.POST.get('comment')

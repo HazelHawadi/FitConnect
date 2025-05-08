@@ -5,10 +5,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from .forms import ProfileUpdateForm
 from programs.models import Booking
-from .models import Subscription
+from subscriptions import views
+from subscriptions.models import Subscription
 from datetime import date
 from django.utils import timezone
 from datetime import timedelta
+from django.contrib import messages
+import stripe
+from django.conf import settings
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def home(request):
@@ -77,21 +83,6 @@ def pricing(request):
     ]
     return render(request, 'subscription/pricing.html', {'plans': plans})
 
-@login_required
-def subscribe(request, plan_name):
-    duration_days = 30
-    renewal_date = timezone.now().date() + timedelta(days=duration_days)
-
-    Subscription.objects.update_or_create(
-        user=request.user,
-        defaults={
-            'plan_name': plan_name,
-            'renewal_date': renewal_date,
-            'active': True,
-        }
-    )
-    return redirect('dashboard')
-
 
 @login_required
 def update_profile(request):
@@ -100,7 +91,7 @@ def update_profile(request):
         if form.is_valid():
             form.save()
             update_session_auth_hash(request, form.instance)
-            return redirect('profile')
+            return redirect('account_profile')
     else:
         form = ProfileUpdateForm(instance=request.user)
     

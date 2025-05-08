@@ -64,18 +64,6 @@
             {% endif %}
         </div>
 
-        <div class="mb-3">
-            <label for="id_phone_number" class="form-label">Phone Number</label>
-            {{ form.phone_number|add_class:"form-control" }}
-            {% if form.phone_number.errors %}
-                <div class="text-danger">
-                    {% for error in form.phone_number.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
         <button type="submit" class="btn btn-primary w-100">Save Changes</button>
     </form>
 </div>

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% if messages %}
+    <div class="alert alert-warning" role="alert">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-4">My Subscription</h3>
+
+{% load static %}
+
+{% block content %}
+{% if messages %}
+    <div class="alert alert-warning" role="alert">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-4">My Subscription</h3>
+
+                    {% if subscription %}
+                        <ul class="list-group list-group-flush mb-4">
+                            <li class="list-group-item">
+                                <strong>Plan:</strong> {{ subscription.plan_name }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Start Date:</strong> {{ subscription.start_date }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>End Date:</strong>
+                                {{ subscription.end_date|default:"Ongoing" }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Status:</strong>
+                                {% if is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </li>
+                        </ul>
+
+                        {% if is_active %}
+                        <div class="d-flex justify-content-between">
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" name="cancel" class="btn btn-outline-danger">
+                                    Cancel Subscription
+                                </button>
+                            </form>
+                            <a href="#" class="btn btn-outline-secondary">Change Plan</a>
+                        </div>
+                        {% else %}
+                            <p class="text-muted">Your subscription has ended.</p>
+                            <a href="{{ subscribe_url }}" class="btn btn-primary">Renew Subscription</a>
+                        {% endif %}
+                    {% else %}
+                        <p>You currently do not have an active subscription.</p>
+                        <a href="{{ subscribe_url }}" class="btn btn-success">Subscribe Now</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

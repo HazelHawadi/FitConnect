@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'home',
     'programs',
+    'subscriptions',
     
     # Other
     'widget_tweaks',

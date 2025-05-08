@@ -47,7 +47,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                                 {% if request.user.is_authenticated %}
-                                    <li><a class="dropdown-item" href="#">My Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'account_profile' %}">My Profile</a></li>
                                     <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
                                 {% else %}
                                     <li><a class="dropdown-item" href="{% url 'account_signup' %}">Register</a></li>
@@ -75,7 +75,7 @@
                 </div>
                 <div class="col-md-6 mb-3 text-md-right">
                     <h5>Follow Us</h5>
-                    <a href="https://facebook.com" target="_blank" class="text-decoration-none">
+                    <a href="https://www.facebook.com/profile.php?id=61575883718653" target="_blank" class="text-decoration-none">
                         <i class="fab fa-facebook fa-lg"></i> Facebook
                     </a>
                 </div>

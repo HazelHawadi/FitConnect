@@ -13,7 +13,7 @@
                     <i class="bi bi-person-circle dashboard-icon text-primary"></i>
                     <h5 class="card-title mt-2">My Profile</h5>
                     <p class="card-text">{{ user.email }}</p>
-                    <a href="{% url 'account_update_profile' %}" class="btn btn-outline-primary btn-sm">View / Edit Profile</a>
+                    <a href="{% url 'account_profile' %}" class="btn btn-outline-primary btn-sm">View / Edit Profile</a>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
                     {% if subscription %}
                         <p class="mb-2"><strong>{{ subscription.plan_name }}</strong></p>
                         <p class="text-muted">Renews on {{ subscription.renewal_date }}</p>
-                        <a href="{% url 'manage_subscription' %}" class="btn btn-outline-warning btn-sm">Manage</a>
+                        <a href="{% url 'manage_subscription' %}" class="btn btn-outline-warning btn-sm">Manage Subscription</a>
                     {% else %}
                         <p class="text-muted">No active subscription.</p>
                         <a href="{% url 'pricing' %}" class="btn btn-outline-warning btn-sm">Subscribe Now</a>
