@@ -1,13 +1,6 @@
-<<<<<<< HEAD
-__pycache__
-*.pyc
-*.sqlite3
-.env
-=======
 __pycache__
 *.pyc
 *.sqlite3
 .env
 .venv
 env.py
->>>>>>> ba34c1e (Installed required apps)
