@@ -1,12 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <div class="container mt-5">
-    <h3>Booking Confirmed!</h3>
-    <p>Thank you for booking <strong>{{ booking.program.title }}</strong>.</p>
-    <p><strong>Instructor:</strong> {{ booking.program.instructor.name }}</p>
-    <p><strong>Date:</strong> {{ booking.date.date }}</p>
-    <p><strong>Sessions:</strong> {{ booking.sessions }}</p>
-    <p><strong>Total Paid:</strong> ${{ booking.total_cost }}</p>
+    <div class="card success-card shadow-lg p-4">
+        <div class="card-body text-center">
+            <h2 class="card-title text-success mb-4">🎉 Booking Confirmed!</h2>
+            <p class="lead">Thank you for booking <strong>{{ booking.program.title }}</strong>.</p>
+            <ul class="list-group list-group-flush mt-4 text-start">
+                <li class="list-group-item"><strong>Instructor:</strong> {{ booking.program.instructor.name }}</li>
+                <li class="list-group-item"><strong>Date:</strong> {{ booking.date.date }}</li>
+                <li class="list-group-item"><strong>Sessions:</strong> {{ booking.sessions }}</li>
+                <li class="list-group-item"><strong>Total Paid:</strong> ${{ booking.total_cost }}</li>
+            </ul>
+        </div>
+    </div>
 </div>
 
 <!-- EmailJS Script -->

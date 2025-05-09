@@ -138,7 +138,31 @@ def confirm_booking(request):
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
     })
     
+
+@require_POST
+def complete_booking(request):
+    # Get form data and create a booking
+    Booking.objects.create(
+        full_name=request.POST['full_name'],
+        email=request.POST['email'],
+        phone_number=request.POST['phone_number'],
+    )
+    return render(request, 'booking_success.html')
+
     
+@require_POST
+def cache_booking_data(request):
+    try:
+        client_secret = request.POST.get('client_secret')
+        save_info = request.POST.get('save_info')
+
+        request.session['save_info'] = save_info
+
+        return HttpResponse(status=200)
+    except Exception as e:
+        return HttpResponse(content=e, status=400)
+    
+
 def booking_success(request):
     booking_data = request.session.pop('booking_data', None)
     if not booking_data:

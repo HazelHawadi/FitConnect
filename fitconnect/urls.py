@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('home.urls')),
     path('accounts/', include('allauth.urls')),
+    path('', include('programs.urls')),
     path('programs/', include('programs.urls')),
     path('subscription/', include('subscriptions.urls')),
     path("contact/", TemplateView.as_view(template_name="contact_us.html"), name="contact_us"),
