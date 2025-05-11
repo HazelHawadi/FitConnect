@@ -1,0 +1,1 @@
+gunicorn fitconnect.wsgi:application
