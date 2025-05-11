@@ -19,18 +19,23 @@
 <!-- EmailJS Script -->
 <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
 <script type="text/javascript">
-  (function(){
-      emailjs.init("your_emailjs_user_id");
-  })();
+  document.addEventListener('DOMContentLoaded', function () {
+    emailjs.init("your_user_id");
 
-  emailjs.send("your_service_id", "your_template_id", {
-      user_email: "{{ request.user.email }}",
-      user_name: "{{ request.user.username }}",
-      program_title: "{{ booking.program.title }}",
-      instructor: "{{ booking.program.instructor.name }}",
-      date: "{{ booking.date.date }}",
-      sessions: "{{ booking.sessions }}",
-      total: "{{ booking.total_cost }}"
+    emailjs.send("your_service_id", "your_template_id", {
+        user_email: "{{ request.user.email }}",
+        user_name: "{{ request.user.username }}",
+        program_title: "{{ booking.program.title }}",
+        instructor: "{{ booking.program.instructor.name }}",
+        date: "{{ booking.date.date }}",
+        sessions: "{{ booking.sessions }}",
+        total: "{{ booking.total_cost }}"
+    })
+    .then(function(response) {
+       console.log("Email sent successfully!", response.status, response.text);
+    }, function(error) {
+       console.error("Email sending failed:", error);
+    });
   });
 </script>
 {% endblock %}
