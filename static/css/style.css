@@ -471,6 +471,109 @@ img {
     background-color: #5a6268;
 }
 
+
+/* Contact Form styling */
+#contact-form {
+    background-color: #000;
+    color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#contact-form .form-control {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #ccc;
+}
+
+#contact-form .form-label {
+    color: #000;
+}
+
+#contact-form .btn-primary {
+    background-color: #0056b3;
+    border: none;
+}
+
+
+/* Login, Logout, Signup pages */
+.auth-container {
+  max-width: 400px;
+  margin: 3rem auto;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  background: #fff;
+  text-align: center;
+}
+
+.auth-title {
+  font-size: 24px;
+  margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.auth-form {
+  text-align: left;
+}
+
+.auth-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.auth-button {
+  background-color: #28a745;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.auth-button.danger {
+  background-color: #dc3545;
+}
+
+.auth-link {
+  font-size: 0.9rem;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.auth-footer {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* Booking success page */
+.success-card {
+    border-left: 6px solid #28a745;
+    background-color: #f9fffa;
+    border-radius: 12px;
+    max-width: 600px;
+    margin: auto;
+}
+
+.card-title {
+    font-weight: bold;
+}
+
+.list-group-item {
+    background-color: transparent;
+    border: none;
+    padding-left: 0;
+}
+
+
 /* Responsive */
 @media (max-width: 767px) {
     .img-fluid.rounded-circle {

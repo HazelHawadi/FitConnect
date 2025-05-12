@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5 text-center">
+    <h2 class="fw-bold text-danger">Payment Cancelled</h2>
+    <p class="text-muted">Your payment was not processed. You can try again or choose another action.</p>
+    <div class="mt-4">
+        <a href="{% url 'program_detail' program.id %}" class="btn btn-primary btn-lg">Go Back to Program</a>
+        <a href="{% url 'home' %}" class="btn btn-outline-primary btn-lg">Back to Homepage</a>
+    </div>
+</div>
+{% endblock %}

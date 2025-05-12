@@ -66,41 +66,33 @@ def book_program(request, program_id):
     return render(request, 'programs/booking_form.html', {'form': form, 'program': program})
 
 
-@csrf_exempt
-def create_checkout_session(request):
-    if request.method == 'POST':
-        amount = request.POST.get('amount')
+@require_POST
+def create_checkout_session(request, program_id):
+    program = get_object_or_404(Program, id=program_id)
+    total = request.POST.get('total')  # Retrieve total from POST data
 
-        if not amount:
-            raise ValueError("Amount is missing")
-
-        try:
-            amount = float(amount)
-        except ValueError:
-            raise ValueError("Invalid amount format")
-
-        session = stripe.checkout.Session.create(
+    try:
+        checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
-            line_items=[
-                {
-                    'price_data': {
-                        'currency': 'usd',
-                        'product_data': {
-                            'name': 'Program Booking',
-                        },
-                        'unit_amount': int(amount * 100),
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': f"{program.title}",
                     },
-                    'quantity': 1,
+                    'unit_amount': int(float(total) * 100),  # Convert total to cents
                 },
-            ],
+                'quantity': 1,
+            }],
             mode='payment',
-            success_url=request.build_absolute_uri('/success/'),
-            cancel_url=request.build_absolute_uri('/cancel/'),
+            success_url=request.build_absolute_uri('/booking/success/'),
+            cancel_url=request.build_absolute_uri('/programs/'),
         )
 
-        return JsonResponse({
-            'id': session.id
-        })
+        return JsonResponse({'id': checkout_session.id})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
         
         
 def confirm_booking(request):
@@ -111,10 +103,15 @@ def confirm_booking(request):
     program = get_object_or_404(Program, pk=booking_data['program_id'])
     date = program.dates.get(id=booking_data['date_id'])
     sessions = booking_data['sessions']
+
+    if program.price_per_session is None:
+        return render(request, 'error.html', {
+            'message': 'Program price is missing. Please contact support.'
+        })
+
     total = float(program.price_per_session) * sessions
 
     if request.method == 'POST':
-        # create Stripe Checkout Session
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
@@ -138,10 +135,34 @@ def confirm_booking(request):
         'date': date,
         'sessions': sessions,
         'total': total,
-        'stripe_public_key': settings.STRIPE_PUBLIC_KEY
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
     })
     
+
+@require_POST
+def complete_booking(request):
+    # Get form data and create a booking
+    Booking.objects.create(
+        full_name=request.POST['full_name'],
+        email=request.POST['email'],
+        phone_number=request.POST['phone_number'],
+    )
+    return render(request, 'booking_success.html')
+
     
+@require_POST
+def cache_booking_data(request):
+    try:
+        client_secret = request.POST.get('client_secret')
+        save_info = request.POST.get('save_info')
+
+        request.session['save_info'] = save_info
+
+        return HttpResponse(status=200)
+    except Exception as e:
+        return HttpResponse(content=e, status=400)
+    
+
 def booking_success(request):
     booking_data = request.session.pop('booking_data', None)
     if not booking_data:
@@ -150,6 +171,12 @@ def booking_success(request):
     program = get_object_or_404(Program, pk=booking_data['program_id'])
     date = program.dates.get(id=booking_data['date_id'])
     sessions = booking_data['sessions']
+
+    if program.price_per_session is None:
+        return render(request, 'error.html', {
+            'message': 'Program price is missing. Please contact support.'
+        })
+
     total_cost = float(program.price_per_session) * sessions
 
     booking = Booking.objects.create(
@@ -165,6 +192,26 @@ def booking_success(request):
         'booking': booking
     })
 
+
+def payment_success(request):
+    program_id = request.GET.get('program_id')
+    program = get_object_or_404(Program, id=program_id)
+    date = get_program_date(program)
+    total = calculate_total(program)
+
+    return render(request, 'payment_success.html', {
+        'program': program,
+        'date': date,
+        'total': total
+    })
+
+def payment_cancel(request):
+    program_id = request.GET.get('program_id')
+    program = get_object_or_404(Program, id=program_id)
+
+    return render(request, 'payment_cancel.html', {
+        'program': program
+    })
 
 
 @login_required
