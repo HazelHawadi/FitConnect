@@ -13,9 +13,13 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 from decouple import config
+from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env_path = BASE_DIR / '.env'
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +31,11 @@ SECRET_KEY = 'django-insecure-4zcr=2j!vqi)k1+b13uxyb6hef-ylg!rp%tuq0urrxwjm37(4)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1:8000',
+    'localhost',
+    'https://fitconnectog-e095aee33185.herokuapp.com/',
+]
 
 
 # Application definition
@@ -108,12 +116,17 @@ WSGI_APPLICATION = 'fitconnect.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
     }
-}
+else: 
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY')
