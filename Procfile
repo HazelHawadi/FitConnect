@@ -1,1 +1,1 @@
-gunicorn FITCONNECT.wsgi:application
+web: gunicorn fitconnect.wsgi:application
