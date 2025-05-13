@@ -29,7 +29,7 @@ def subscribe(request, plan_name):
 
     if not price_id:
         messages.error(request, "Invalid plan selected.")
-        return redirect('pricing_view')
+        return redirect('subscriptions:pricing_view')
 
     try:
         checkout_session = stripe.checkout.Session.create(
