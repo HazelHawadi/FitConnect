@@ -33,7 +33,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = 'DEVELOPMENT' in os.environ
 
 ALLOWED_HOSTS = [
-    'http://127.0.0.1:8000/',
+    '127.0.0.1',
     'localhost',
     'https://fitconnectog-e095aee33185.herokuapp.com/',
     'fitconnectog-e095aee33185.herokuapp.com',
