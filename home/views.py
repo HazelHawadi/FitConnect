@@ -64,17 +64,6 @@ def profile(request):
 
 
 @login_required
-def my_bookings(request):
-    user = request.user
-    bookings = user.bookings.all()
-    
-    context = {
-        'bookings': bookings,
-    }
-    return render(request, 'bookings/my_bookings.html', context)
-
-
-@login_required
 def pricing(request):
     plans = [
         {'name': 'Basic', 'price': '$10/month', 'duration_days': 30},

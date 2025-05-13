@@ -81,47 +81,17 @@ def manage_subscription(request):
 
 
 @csrf_exempt
-@require_POST
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
-
     try:
-        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-    except stripe.error.SignatureVerificationError:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
         return HttpResponse(status=400)
-
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        customer_email = session.get('customer_email')
-        subscription_id = session.get('subscription')
-        plan_name = None
-
-    try:
-        user = User.objects.get(email=customer_email)
-        stripe_subscription = stripe.Subscription.retrieve(subscription_id)
-        price_id = stripe_subscription['items']['data'][0]['price']['id']
-
-        # Find plan name based on price_id
-        for name, id in PLAN_PRICES.items():
-            if id == price_id:
-                plan_name = name
-                break
-
-        if plan_name:
-            Subscription.objects.update_or_create(
-                user=user,
-                defaults={
-                    'plan_name': plan_name,
-                    'active': True,
-                    'renewal_date': timezone.now().date() + timedelta(days=30),
-                    'stripe_subscription_id': subscription_id,
-                    'benefits': plan_benefits(plan_name),
-                }
-            )
-    except Exception as e:
-        print("Webhook processing error:", e)
+    except stripe.error.SignatureVerificationError as e:
+        return HttpResponse(status=400)
 
     return HttpResponse(status=200)
 
