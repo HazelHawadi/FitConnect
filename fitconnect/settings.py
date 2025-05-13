@@ -35,7 +35,6 @@ DEBUG = 'DEVELOPMENT' in os.environ
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'https://fitconnectog-e095aee33185.herokuapp.com/',
     'fitconnectog-e095aee33185.herokuapp.com',
 ]
 
@@ -60,6 +59,7 @@ INSTALLED_APPS = [
     # Other
     'widget_tweaks',
     'storages',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -133,6 +133,9 @@ else:
 STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
 STRIPE_WH_SECRET = config('STRIPE_WH_SECRET')
+STRIPE_BASIC_PRICE_ID = config("STRIPE_BASIC_PRICE_ID")
+STRIPE_PRO_PRICE_ID = config("STRIPE_PRO_PRICE_ID")
+STRIPE_ELITE_PRICE_ID = config("STRIPE_ELITE_PRICE_ID")
 
 if 'DEVELOPMENT' in os.environ:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

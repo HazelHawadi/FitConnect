@@ -497,6 +497,105 @@ img {
 }
 
 
+/* My Bookings page */
+.my-bookings-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.booking-list {
+  margin-top: 30px;
+}
+
+.booking-item {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.booking-header h3 {
+  font-size: 1.5rem;
+  color: #2e3a59;
+}
+
+.booking-status {
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-weight: bold;
+}
+
+.booking-status.paid {
+  background-color: #4caf50;
+  color: white;
+}
+
+.booking-status.pending {
+  background-color: #ff9800;
+  color: white;
+}
+
+.booking-item p {
+  font-size: 1rem;
+  color: #555;
+  margin: 5px 0;
+}
+
+.booking-actions {
+  margin-top: 15px;
+}
+
+.btn {
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  margin: 5px;
+  display: inline-block;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.btn-details {
+  background-color: #3f51b5;
+  color: white;
+}
+
+.btn-details:hover {
+  background-color: #303f9f;
+}
+
+.btn-pay {
+  background-color: #ff5722;
+  color: white;
+}
+
+.btn-pay:hover {
+  background-color: #d84315;
+}
+
+.no-bookings-message {
+  font-size: 1.2rem;
+  color: #888;
+  text-align: center;
+  margin-top: 50px;
+}
+
 /* Login, Logout, Signup pages */
 .auth-container {
   max-width: 400px;

@@ -215,6 +215,14 @@ def payment_cancel(request):
 
 
 @login_required
+def my_bookings(request):
+    user = request.user
+    bookings = user.bookings.all()
+
+    return render(request, 'programs/my_bookings.html', {'bookings': bookings})
+
+
+@login_required
 def add_review(request, program_id):
     program = get_object_or_404(Program, pk=program_id)
 

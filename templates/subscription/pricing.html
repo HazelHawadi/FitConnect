@@ -1,20 +1,64 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Choose a Plan</h2>
     <div class="row justify-content-center g-4">
-        {% for plan in plans %}
+
         <div class="col-md-4">
             <div class="card shadow-sm h-100 text-center">
                 <div class="card-body">
-                    <h4 class="card-title">{{ plan.name }}</h4>
-                    <p class="card-text display-6">{{ plan.price }}</p>
-                    <p class="text-muted">Renews every {{ plan.duration_days }} days</p>
-                    <a href="{% url 'subscribe' plan.name %}" class="btn btn-primary">Subscribe</a>
+                    <h4 class="card-title">Basic</h4>
+                    <p class="card-text display-6">$20.99</p>
+                    <p class="text-muted">Renews every 30 days</p>
+
+                    <ul class="list-group list-group-flush mb-4">
+                        {% for benefit in plan_benefits.Basic %}
+                            <li class="list-group-item">{{ benefit }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    <a href="{% url 'subscriptions:subscribe' 'Basic' %}" class="btn btn-primary">Subscribe</a>
                 </div>
             </div>
         </div>
-        {% endfor %}
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h4 class="card-title">Pro</h4>
+                    <p class="card-text display-6">$35.00</p>
+                    <p class="text-muted">Renews every 30 days</p>
+
+                    <ul class="list-group list-group-flush mb-4">
+                        {% for benefit in plan_benefits.Pro %}
+                            <li class="list-group-item">{{ benefit }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    <a href="{% url 'subscriptions:subscribe' 'Pro' %}" class="btn btn-primary">Subscribe</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h4 class="card-title">Elite</h4>
+                    <p class="card-text display-6">$69.99</p>
+                    <p class="text-muted">Renews every 30 days</p>
+
+                    <ul class="list-group list-group-flush mb-4">
+                        {% for benefit in plan_benefits.Elite %}
+                            <li class="list-group-item">{{ benefit }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    <a href="{% url 'subscriptions:subscribe' 'Elite' %}" class="btn btn-primary">Subscribe</a>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 {% endblock %}

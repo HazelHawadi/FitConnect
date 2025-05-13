@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container my-bookings-container">
+    <h1>Your Bookings</h1>
+
+    {% if bookings %}
+      <div class="booking-list">
+        {% for booking in bookings %}
+          <div class="booking-item">
+            <div class="booking-header">
+              <h3>{{ booking.program.title }}</h3>
+              <span class="booking-status {% if booking.paid %} paid {% else %} pending {% endif %}">
+                {% if booking.paid %} Paid {% else %} Pending {% endif %}
+              </span>
+            </div>
+            <p><strong>Date:</strong> {{ booking.date.date }} at {{ booking.time }}</p>
+            <p><strong>Sessions:</strong> {{ booking.sessions }}</p>
+            <p><strong>Total Cost:</strong> ${{ booking.total_cost }}</p>
+            <div class="booking-actions">
+              <a href="{% url 'program_detail' pk=booking.program.id %}" class="btn btn-primary">View Program</a>
+              {% if not booking.paid %}
+                <a href="{% url 'complete_booking' booking_id=booking.id %}" class="btn btn-pay">Pay Now</a>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="no-bookings-message">You have no bookings yet. Browse our programs and book your next session!</p>
+    {% endif %}
+  </div>
+{% endblock %}

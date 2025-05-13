@@ -37,7 +37,8 @@ class AvailableDate(models.Model):
 
 
 class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='bookings', on_delete=models.CASCADE)
+    booking_date = models.DateTimeField(null=True)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
     date = models.ForeignKey(AvailableDate, on_delete=models.CASCADE)
     time = models.TimeField(default=time(12, 0))
