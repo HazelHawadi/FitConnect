@@ -18,7 +18,7 @@
             <p><strong>Sessions:</strong> {{ booking.sessions }}</p>
             <p><strong>Total Cost:</strong> ${{ booking.total_cost }}</p>
             <div class="booking-actions">
-              <a href="{% url 'program_detail' pk=booking.program.id %}" class="btn btn-primary">View Program</a>
+              <a href="{% url 'program_detail' pk=booking.program.id %}" class="btn btn-outline-success btn-sm mt-2">View Program</a>
               {% if not booking.paid %}
                 <a href="{% url 'complete_booking' booking_id=booking.id %}" class="btn btn-pay">Pay Now</a>
               {% endif %}
