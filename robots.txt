@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin/
+
+Sitemap: https://fitconnectogbucket.s3.amazonaws.com/sitemap.xml
