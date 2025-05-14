@@ -89,12 +89,35 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
+
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            subscription_id = session.get('subscription')
+
+            if subscription_id:
+                user_email = session.get('customer_email')
+                user = User.objects.filter(email=user_email).first()
+
+                if user:
+                    subscription, created = Subscription.objects.get_or_create(
+                        user=user,
+                        stripe_subscription_id=subscription_id,
+                    )
+
+                    subscription.plan_name = session.get('line_items')[0].get('price').get('nickname')
+                    subscription.start_date = timezone.now()
+                    subscription.end_date = timezone.now() + timedelta(days=30)
+                    subscription.save()
+
+                    messages.success(user, "Your subscription was successfully created!")
+
+        return HttpResponse(status=200)
+
     except ValueError:
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError:
         return HttpResponse(status=400)
 
-    return HttpResponse(status=200)
 
 def plan_benefits(plan_name):
     return {
