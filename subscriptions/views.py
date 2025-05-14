@@ -33,16 +33,20 @@ def subscribe(request, plan_name):
 
     try:
         checkout_session = stripe.checkout.Session.create(
-            customer_email=user.email,
-            payment_method_types=['card'],
-            line_items=[{
-                'price': price_id,
-                'quantity': 1,
-            }],
-            mode='subscription',
-            success_url=request.build_absolute_uri(reverse('subscriptions:subscription_success')),
-            cancel_url=request.build_absolute_uri(reverse('subscriptions:pricing_view')),
-        )
+    customer_email=user.email,
+    payment_method_types=['card'],
+    line_items=[{
+        'price': price_id,
+        'quantity': 1,
+    }],
+    mode='subscription',
+    success_url=request.build_absolute_uri(reverse('subscriptions:subscription_success')),
+    cancel_url=request.build_absolute_uri(reverse('subscriptions:pricing_view')),
+    metadata={
+        'plan_name': plan_name
+    },
+)
+
         return redirect(checkout_session.url)
     except Exception as e:
         messages.error(request, f"Stripe error: {e}")
@@ -89,35 +93,12 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-
-        if event['type'] == 'checkout.session.completed':
-            session = event['data']['object']
-            subscription_id = session.get('subscription')
-
-            if subscription_id:
-                user_email = session.get('customer_email')
-                user = User.objects.filter(email=user_email).first()
-
-                if user:
-                    subscription, created = Subscription.objects.get_or_create(
-                        user=user,
-                        stripe_subscription_id=subscription_id,
-                    )
-
-                    subscription.plan_name = session.get('line_items')[0].get('price').get('nickname')
-                    subscription.start_date = timezone.now()
-                    subscription.end_date = timezone.now() + timedelta(days=30)
-                    subscription.save()
-
-                    messages.success(user, "Your subscription was successfully created!")
-
-        return HttpResponse(status=200)
-
     except ValueError:
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError:
         return HttpResponse(status=400)
 
+    return HttpResponse(status=200)
 
 def plan_benefits(plan_name):
     return {
