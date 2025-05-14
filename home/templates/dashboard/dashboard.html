@@ -27,7 +27,7 @@
                     {% if upcoming_bookings %}
                         <ul class="list-unstyled small mt-3">
                             {% for booking in upcoming_bookings|slice:":3" %}
-                                <li><strong>{{ booking.class_name }}</strong> - {{ booking.date }} at {{ booking.time }}</li>
+                                <li><strong>{{ booking.program.title }}</strong> - {{ booking.date }} at {{ booking.time }}</li>
                             {% endfor %}
                         </ul>
                         <a href="{% url 'my_bookings' %}" class="btn btn-outline-success btn-sm mt-2">View All</a>

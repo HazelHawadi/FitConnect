@@ -31,10 +31,7 @@ def user_dashboard(request):
         date__date__gte=date.today()
     ).order_by('date__date')[:5]
 
-    try:
-        subscription = Subscription.objects.get(user=user, active=True)
-    except Subscription.DoesNotExist:
-        subscription = None
+    subscription = Subscription.objects.filter(user=user).last()
 
     recent_activity = [
         f"Booked class: {b.program.title} on {b.date.date}" for b in upcoming_bookings
@@ -45,6 +42,7 @@ def user_dashboard(request):
         'subscription': subscription,
         'recent_activity': recent_activity,
     }
+
     return render(request, 'dashboard/dashboard.html', context)
 
 
