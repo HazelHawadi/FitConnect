@@ -29,24 +29,20 @@ def subscribe(request, plan_name):
 
     if not price_id:
         messages.error(request, "Invalid plan selected.")
-        return redirect('subscriptions:pricing_view')
+        return redirect('pricing_view')
 
     try:
         checkout_session = stripe.checkout.Session.create(
-    customer_email=user.email,
-    payment_method_types=['card'],
-    line_items=[{
-        'price': price_id,
-        'quantity': 1,
-    }],
-    mode='subscription',
-    success_url=request.build_absolute_uri(reverse('subscriptions:subscription_success')),
-    cancel_url=request.build_absolute_uri(reverse('subscriptions:pricing_view')),
-    metadata={
-        'plan_name': plan_name
-    },
-)
-
+            customer_email=user.email,
+            payment_method_types=['card'],
+            line_items=[{
+                'price': price_id,
+                'quantity': 1,
+            }],
+            mode='subscription',
+            success_url=request.build_absolute_uri(reverse('subscriptions:subscription_success')),
+            cancel_url=request.build_absolute_uri(reverse('subscriptions:pricing_view')),
+        )
         return redirect(checkout_session.url)
     except Exception as e:
         messages.error(request, f"Stripe error: {e}")
