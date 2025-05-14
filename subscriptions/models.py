@@ -4,8 +4,8 @@ from django.utils import timezone
 
 class Subscription(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    plan_name = models.CharField(max_length=100)
-    renewal_date = models.DateField(null=False)
+    plan_name = models.CharField(max_length=100, blank=True, null=True)
+    renewal_date = models.DateField(null=True, blank=True)
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     start_date = models.DateField(default=timezone.now)
