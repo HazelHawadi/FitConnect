@@ -96,3 +96,7 @@ def update_profile(request):
         form = ProfileUpdateForm(instance=request.user)
     
     return render(request, 'account/update_profile.html', {'form': form})
+
+
+def contact_us(request):
+    return render(request, 'contact_us.html')
