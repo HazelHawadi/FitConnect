@@ -27,4 +27,6 @@ urlpatterns = [
     path('programs/', include('programs.urls')),
     path('subscription/', include('subscriptions.urls')),
     path('contact/', views.contact_us, name='contact_us'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
