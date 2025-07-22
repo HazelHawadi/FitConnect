@@ -8,8 +8,12 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.urls import reverse
 from django.views.generic import ListView, DetailView
 from .models import Instructor
+from django.utils import timezone
+from datetime import datetime
+import json
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -36,6 +40,12 @@ def program_detail(request, pk):
     program = get_object_or_404(Program, pk=pk)
     available_dates = AvailableDate.objects.filter(program=program, is_booked=False)
 
+    # Get already booked datetime slots
+    booked_slots = Booking.objects.filter(program=program).values_list('date__date', 'time')
+    booked_datetimes = [
+        timezone.datetime.combine(d, t).isoformat() for d, t in booked_slots
+    ]
+
     user_has_reviewed = False
     if request.user.is_authenticated:
         user_has_reviewed = Review.objects.filter(user=request.user, program=program).exists()
@@ -44,6 +54,7 @@ def program_detail(request, pk):
         'program': program,
         'available_dates': available_dates,
         'user_has_reviewed': user_has_reviewed,
+        'booked_slots_json': json.dumps(booked_datetimes),
     })
 
 
@@ -56,17 +67,26 @@ def book_program(request, program_id):
         if form.is_valid():
             request.session['booking_data'] = {
                 'program_id': program_id,
-                'date_id': form.cleaned_data['date'].id,
+                'datetime': form.cleaned_data['datetime'].isoformat(),
                 'sessions': form.cleaned_data['sessions'],
             }
             return redirect('confirm_booking')
     else:
         form = BookingForm(program=program)
 
-    return render(request, 'programs/booking_form.html', {'form': form, 'program': program})
+    # collect already booked date+time to disable
+    booked_slots = Booking.objects.filter(program=program).values_list('date__date', 'time')
+    booked_datetimes = [
+        timezone.datetime.combine(d, t).isoformat() for d, t in booked_slots
+    ]
+
+    return render(request, 'programs/booking_form.html', {
+        'form': form,
+        'program': program,
+        'booked_slots_json': json.dumps(booked_datetimes),
+    })
 
 
-@csrf_exempt
 def create_checkout_session(request):
     if request.method == 'POST':
         amount = request.POST.get('amount')
@@ -109,9 +129,11 @@ def confirm_booking(request):
         return redirect('home')
 
     program = get_object_or_404(Program, pk=booking_data['program_id'])
-    date = program.dates.get(id=booking_data['date_id'])
+    dt = datetime.fromisoformat(booking_data['datetime'])
     sessions = booking_data['sessions']
     total = float(program.price_per_session) * sessions
+
+    available_date, _ = AvailableDate.objects.get_or_create(program=program, date=dt.date())
 
     if request.method == 'POST':
         # create Stripe Checkout Session
@@ -121,21 +143,22 @@ def confirm_booking(request):
                 'price_data': {
                     'currency': 'usd',
                     'product_data': {
-                        'name': f"{program.title} on {date.date}",
+                        'name': f"{program.title} on {available_date.date}",
                     },
                     'unit_amount': int(total * 100),
                 },
                 'quantity': 1,
             }],
             mode='payment',
-            success_url=request.build_absolute_uri('/booking/success/'),
+            success_url=request.build_absolute_uri(reverse('booking_success')),
             cancel_url=request.build_absolute_uri('/programs/'),
         )
         return redirect(checkout_session.url, code=303)
 
     return render(request, 'programs/confirm_booking.html', {
         'program': program,
-        'date': date,
+        'date': available_date,
+        'time': dt.time(),
         'sessions': sessions,
         'total': total,
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY
@@ -148,24 +171,27 @@ def booking_success(request):
         return redirect('home')
 
     program = get_object_or_404(Program, pk=booking_data['program_id'])
-    date = program.dates.get(id=booking_data['date_id'])
+    dt = datetime.fromisoformat(booking_data['datetime'])
     sessions = booking_data['sessions']
     total_cost = float(program.price_per_session) * sessions
+
+    # Save booking
+    available_date, created = AvailableDate.objects.get_or_create(program=program, date=dt.date())
+    available_date.is_booked = True
+    available_date.save()
 
     booking = Booking.objects.create(
         user=request.user,
         program=program,
-        date=date,
+        date=available_date,
+        time=dt.time(),
         sessions=sessions,
         total_cost=total_cost,
         paid=True
     )
 
-    return render(request, 'programs/booking_success.html', {
-        'booking': booking
-    })
-
-
+    return render(request, 'programs/booking_success.html', {'booking': booking})
+    
 
 @login_required
 def add_review(request, program_id):

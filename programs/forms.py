@@ -1,16 +1,30 @@
 from django import forms
 from .models import Review
 from .models import AvailableDate
+from .models import Booking
+from django.utils import timezone
 
 class BookingForm(forms.Form):
-    date = forms.ModelChoiceField(queryset=AvailableDate.objects.none(), required=True)
+    datetime = forms.DateTimeField(
+        widget=forms.TextInput(attrs={'id': 'datetimepicker'}),
+        label='Choose Date & Time'
+    )
     sessions = forms.IntegerField(min_value=1, initial=1)
 
     def __init__(self, *args, **kwargs):
-        program = kwargs.pop('program', None)
+        self.program = kwargs.pop('program', None)
         super().__init__(*args, **kwargs)
-        if program:
-            self.fields['date'].queryset = AvailableDate.objects.filter(program=program, is_booked=False)
+
+    def clean_datetime(self):
+        datetime = self.cleaned_data['datetime']
+        # block past dates
+        if datetime < timezone.now():
+            raise forms.ValidationError("You cannot book in the past.")
+
+        # Check if someone already booked this slot
+        if Booking.objects.filter(program=self.program, time=datetime.time(), date__date=datetime.date()).exists():
+            raise forms.ValidationError("This time slot is already booked.")
+        return datetime
 
 class ReviewForm(forms.ModelForm):
     class Meta:

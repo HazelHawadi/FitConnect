@@ -1,16 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from programs.models import Program
-from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from .forms import ProfileUpdateForm
 from programs.models import Booking
-from subscriptions import views
 from subscriptions.models import Subscription
 from datetime import date
-from django.utils import timezone
-from datetime import timedelta
-from django.contrib import messages
 import stripe
 from django.conf import settings
 
