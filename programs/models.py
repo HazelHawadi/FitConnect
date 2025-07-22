@@ -29,14 +29,13 @@ class Program(models.Model):
 class AvailableDate(models.Model):
     program = models.ForeignKey(Program, related_name='dates', on_delete=models.CASCADE)
     date = models.DateField()
-    is_booked = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.program.title} on {self.date}"
 
 
 class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
     date = models.ForeignKey(AvailableDate, on_delete=models.CASCADE)
     time = models.TimeField(default=time(12, 0))

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h1 class="mb-4">My Bookings</h1>
+
+    {% if bookings %}
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Program</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Sessions</th>
+            <th>Total Cost</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for booking in bookings %}
+          <tr>
+            <td>{{ booking.program.title }}</td>
+            <td>{{ booking.date.date|date:"F j, Y" }}</td>
+            <td>{{ booking.time|time:"g:i A" }}</td>
+            <td>{{ booking.sessions }}</td>
+            <td>${{ booking.total_cost }}</td>
+            <td>
+              {% if booking.paid %}
+                <span class="badge bg-success">Paid</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">Pending</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="alert alert-info" role="alert">
+        You have no bookings yet. <a href="{% url 'program_list' %}">Browse programs</a> to get started!
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

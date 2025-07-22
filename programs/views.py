@@ -38,13 +38,13 @@ def program_list(request):
 
 def program_detail(request, pk):
     program = get_object_or_404(Program, pk=pk)
-    available_dates = AvailableDate.objects.filter(program=program, is_booked=False)
+    available_dates = AvailableDate.objects.filter(program=program)
 
     # Get already booked datetime slots
     booked_slots = Booking.objects.filter(program=program).values_list('date__date', 'time')
     booked_datetimes = [
         timezone.datetime.combine(d, t).isoformat() for d, t in booked_slots
-    ]
+]
 
     user_has_reviewed = False
     if request.user.is_authenticated:
@@ -177,8 +177,6 @@ def booking_success(request):
 
     # Save booking
     available_date, created = AvailableDate.objects.get_or_create(program=program, date=dt.date())
-    available_date.is_booked = True
-    available_date.save()
 
     booking = Booking.objects.create(
         user=request.user,

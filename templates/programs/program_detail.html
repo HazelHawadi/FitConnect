@@ -115,18 +115,24 @@
       totalEl.textContent = (sessions * price).toFixed(2);
   });
 
-  const bookedSlots = {{ booked_slots_json|safe }};
+  const bookedSlots = JSON.parse('{{ booked_slots_json|escapejs }}');
 
   flatpickr("#datetimepicker", {
       enableTime: true,
       dateFormat: "Y-m-d H:i",
       minDate: "today",
       time_24hr: true,
-      minuteIncrement: 60,
-      disable: bookedSlots,
+      hourIncrement: 2,
       defaultHour: 8,
       minTime: "08:00",
-      maxTime: "18:00"
+      maxTime: "18:00",
+
+      disable: [
+          function(date) {
+              const iso = date.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+              return bookedSlots.includes(iso);
+          }
+      ]
   });
 </script>
 {% endblock %}
