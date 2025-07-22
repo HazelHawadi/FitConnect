@@ -4,12 +4,13 @@ from .models import AvailableDate
 from .models import Booking
 from django.utils import timezone
 
+
 class BookingForm(forms.Form):
     datetime = forms.DateTimeField(
         widget=forms.TextInput(attrs={'id': 'datetimepicker'}),
         label='Choose Date & Time'
     )
-    sessions = forms.IntegerField(min_value=1, initial=1)
+    sessions = forms.IntegerField(min_value=1, max_value=2, initial=1)
 
     def __init__(self, *args, **kwargs):
         self.program = kwargs.pop('program', None)
