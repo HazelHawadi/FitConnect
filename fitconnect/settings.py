@@ -100,7 +100,7 @@ SITE_ID = 1
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_SIGNUP_FIELDS = ['username*', 'email*', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_USERNAME_MIN_LENGTH = 4
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'

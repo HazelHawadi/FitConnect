@@ -202,7 +202,7 @@ def add_review(request, program_id):
             existing_review.rating = request.POST.get('rating')
             existing_review.comment = request.POST.get('comment')
             existing_review.save()
-            return redirect('program_detail', program_id=program.id)
+            return redirect('program_detail', pk=program.id)
         else:
             return render(request, 'programs/add_review.html', {'review': existing_review, 'program': program})
 
@@ -222,7 +222,7 @@ def delete_review(request, program_id):
     review = get_object_or_404(Review, program_id=program_id, user=request.user)
     if request.method == 'POST':
         review.delete()
-        return redirect('program_detail', program_id=program_id)
+        return redirect('program_detail', pk=program_id)
     return render(request, 'programs/confirm_delete_review.html', {'review': review})
 
 

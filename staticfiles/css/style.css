@@ -308,6 +308,28 @@ img {
     border-color: #0056b3;
 }
 
+.rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+}
+
+.rating input {
+    display: none;
+}
+.rating label {
+    font-size: 2rem;
+    color: lightgray;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.rating input:checked ~ label,
+  .rating label:hover,
+  .rating label:hover ~ label {
+    color: gold;
+}
+
 /* General container padding */
 .container {
     padding-top: 30px;
@@ -469,6 +491,27 @@ img {
 
 .actions .btn-secondary:hover {
     background-color: #5a6268;
+}
+
+/* Signout Page */
+.btn-danger:hover, .btn-danger:focus {
+  background-color: #c82333;
+  box-shadow: 0 0 8px rgba(200, 35, 51, 0.7);
+}
+
+.btn-secondary {
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover, .btn-secondary:focus {
+  background-color: #6c757d;
+  box-shadow: 0 0 6px rgba(108, 117, 125, 0.6);
+}
+
+.card-title {
+  font-weight: 700;
+  color: #343a40;
 }
 
 /* Responsive */

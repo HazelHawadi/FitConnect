@@ -8,9 +8,14 @@
             <div class="card shadow-sm h-100 text-center">
                 <div class="card-body">
                     <h4 class="card-title">{{ plan.name }}</h4>
-                    <p class="card-text display-6">{{ plan.price }}</p>
+                    <p class="card-text display-6">${{ plan.price }}</p>
                     <p class="text-muted">Renews every {{ plan.duration_days }} days</p>
-                    <a href="{% url 'subscribe' plan.name %}" class="btn btn-primary">Subscribe</a>
+                    <ul class="list-unstyled my-3">
+                        {% for feature in plan.feature_list %}
+                        <li>✅ {{ feature }}</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'subscribe' plan.id %}" class="btn btn-primary mt-2">Subscribe</a>
                 </div>
             </div>
         </div>

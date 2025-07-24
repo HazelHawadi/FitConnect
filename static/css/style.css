@@ -308,6 +308,28 @@ img {
     border-color: #0056b3;
 }
 
+.rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+}
+
+.rating input {
+    display: none;
+}
+.rating label {
+    font-size: 2rem;
+    color: lightgray;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.rating input:checked ~ label,
+  .rating label:hover,
+  .rating label:hover ~ label {
+    color: gold;
+}
+
 /* General container padding */
 .container {
     padding-top: 30px;
@@ -363,31 +385,62 @@ img {
 }
 
 /* Pricing Page */
-.card.pricing-card {
-    border: 2px solid #dee2e6;
-    transition: all 0.3s ease-in-out;
-}
-.card.pricing-card:hover {
-    border-color: #0d6efd;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-}
-.featured-plan {
-    border-color: #ffc107;
-    background-color: #fff9e6;
+/* Heading */
+h2.text-center {
+  font-weight: 600;
+  font-size: 2rem;
+  color: #333;
 }
 
-.form-control {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
+/* Plan cards */
+.card {
+  border-radius: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
-.form-control:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Plan name */
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* Plan price */
+.card-text.display-6 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #007bff;
+  margin-bottom: 0.25rem;
+}
+
+/* Feature list */
+.card-body ul {
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.card-body li {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+/* Subscribe button */
+.btn-primary {
+  background-color: #007bff;
+  border: none;
+  font-weight: 500;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
 }
 
 /* Error messages */
@@ -469,6 +522,27 @@ img {
 
 .actions .btn-secondary:hover {
     background-color: #5a6268;
+}
+
+/* Signout Page */
+.btn-danger:hover, .btn-danger:focus {
+  background-color: #c82333;
+  box-shadow: 0 0 8px rgba(200, 35, 51, 0.7);
+}
+
+.btn-secondary {
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover, .btn-secondary:focus {
+  background-color: #6c757d;
+  box-shadow: 0 0 6px rgba(108, 117, 125, 0.6);
+}
+
+.card-title {
+  font-weight: 700;
+  color: #343a40;
 }
 
 /* Responsive */
