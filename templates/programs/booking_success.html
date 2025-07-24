@@ -1,12 +1,34 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-5">
-    <h3>Booking Confirmed!</h3>
-    <p>Thank you for booking <strong>{{ booking.program.title }}</strong>.</p>
-    <p><strong>Instructor:</strong> {{ booking.program.instructor.name }}</p>
-    <p><strong>Date:</strong> {{ booking.date.date }}</p>
-    <p><strong>Sessions:</strong> {{ booking.sessions }}</p>
-    <p><strong>Total Paid:</strong> ${{ booking.total_cost }}</p>
+<div class="container py-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body text-center">
+            <div class="mb-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                <h2 class="mt-3">Booking Confirmed!</h2>
+                <p class="lead">Thank you for booking <strong>{{ booking.program.title }}</strong>.</p>
+            </div>
+            <div class="row justify-content-center text-start">
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush fs-5">
+                        <li class="list-group-item">
+                            <strong>Instructor:</strong> {{ booking.program.instructor.name }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Date:</strong> {{ booking.date.date }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Sessions:</strong> {{ booking.sessions }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Total Paid:</strong> ${{ booking.total_cost }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <a href="/" class="btn btn-primary mt-4 px-4">Back to Home</a>
+        </div>
+    </div>
 </div>
 
 <!-- EmailJS Script -->
