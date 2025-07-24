@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from cloudinary.models import CloudinaryField
 from datetime import time
 
 
@@ -20,7 +21,7 @@ class Program(models.Model):
     description = models.TextField()
     price_per_session = models.DecimalField(max_digits=6, decimal_places=2)
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='programs/')
+    image = CloudinaryField('image')
 
     def __str__(self):
         return self.title
