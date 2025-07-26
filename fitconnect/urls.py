@@ -18,6 +18,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from home import views
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
@@ -27,6 +28,13 @@ urlpatterns = [
     path('programs/', include('programs.urls')),
     path('subscription/', include('subscriptions.urls')),
     path('contact/', views.contact_us, name='contact_us'),
+    path(
+        'google5a8e8d4892a3f203.html',
+        TemplateView.as_view(
+            template_name='google5a8e8d4892a3f203.html',
+            content_type='text/html'
+        )
+    ),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
