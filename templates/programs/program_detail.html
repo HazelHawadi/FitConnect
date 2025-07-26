@@ -97,13 +97,10 @@
 </div>
 {% empty %}
 <p>No reviews yet.</p>
-{% endfor %} {% if request.user.is_authenticated %}
-<a
-  href="{% url 'add_review' program.id %}"
-  class="btn btn-outline-primary mt-3"
->
-  {% if user_has_reviewed %}Edit Your Review{% else %}Leave a Review{% endif %}
-</a>
+{% endfor %} {% if request.user.is_authenticated and not user_has_reviewed %}
+  <a href="{% url 'add_review' program.id %}" class="btn btn-outline-primary mt-3">
+    Leave a Review
+  </a>
 {% endif %}
 
 <script>
