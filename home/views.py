@@ -6,6 +6,8 @@ from .forms import ProfileUpdateForm
 from programs.models import Booking
 from subscriptions.models import Subscription
 from datetime import date
+from django.contrib.auth import logout
+from django.contrib import messages
 import stripe
 from django.conf import settings
 
@@ -95,3 +97,14 @@ def update_profile(request):
 
 def contact_us(request):
     return render(request, 'contact_us.html')
+
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        messages.success(request, 'Your account has been successfully deleted.')
+        return redirect('home')
+    return render(request, 'account/delete_account.html')

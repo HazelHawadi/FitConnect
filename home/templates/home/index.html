@@ -6,6 +6,16 @@
 <!-- Hero Section -->
 <section class="hero-header text-white text-center" data-aos="fade-in">
   <div class="container">
+    {% if messages %}
+      <div class="mt-3">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
     <h1>Welcome to FitConnect</h1>
     <p>Your personal gateway to expert-led fitness programs, anywhere, anytime.</p>
     <a href="#programs" class="btn btn-primary btn-lg mt-3">Explore Programs</a>
