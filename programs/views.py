@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Program, AvailableDate, Booking, Review
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
-from .forms import ReviewForm, BookingForm
+from .forms import ReviewForm, BookingForm, UpdateBookingForm
 from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -189,6 +189,46 @@ def booking_success(request):
     )
 
     return render(request, 'programs/booking_success.html', {'booking': booking})
+    
+
+@login_required
+def edit_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if request.method == 'POST':
+        form = UpdateBookingForm(request.POST, program=booking.program, booking_id=booking.id)
+        if form.is_valid():
+            dt = form.cleaned_data['datetime']
+            booking.time = dt.time()
+            booking.sessions = form.cleaned_data['sessions']
+            booking.total_cost = booking.program.price_per_session * booking.sessions
+            booking.date, _ = AvailableDate.objects.get_or_create(program=booking.program, date=dt.date())
+            booking.save()
+            return redirect('my_bookings')
+    else:
+        initial = {
+            'datetime': timezone.datetime.combine(booking.date.date, booking.time),
+            'sessions': booking.sessions,
+        }
+        form = UpdateBookingForm(initial=initial, program=booking.program, booking_id=booking.id)
+
+    return render(request, 'programs/edit_booking.html', {
+        'form': form,
+        'booking': booking,
+    })
+
+
+@login_required
+def cancel_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if request.method == 'POST':
+        booking.delete()
+        return redirect('my_bookings')
+
+    return render(request, 'programs/confirm_cancel_booking.html', {
+        'booking': booking
+    })
     
 
 @login_required

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<div class="container mt-5">
+  <div class="card shadow p-4">
+    <h2 class="mb-4">Edit Booking for <strong>{{ booking.program.title }}</strong></h2>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        {{ form.datetime.label_tag }}
+        {{ form.datetime }}
+      </div>
+      <div class="mb-3">
+        {{ form.sessions.label_tag }}
+        {{ form.sessions }}
+      </div>
+
+      <button class="btn btn-success" type="submit">Update</button>
+      <a href="{% url 'my_bookings' %}" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  flatpickr("#datetimepicker", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    minDate: "today"
+  });
+</script>
+{% endblock %}

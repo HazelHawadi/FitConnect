@@ -27,8 +27,36 @@ class BookingForm(forms.Form):
             raise forms.ValidationError("This time slot is already booked.")
         return datetime
 
+
 class ReviewForm(forms.ModelForm):
     class Meta:
         model = Review
         fields = ['rating', 'comment']
 
+
+class UpdateBookingForm(forms.Form):
+    datetime = forms.DateTimeField(
+        widget=forms.TextInput(attrs={'id': 'datetimepicker'}),
+        label='New Date & Time'
+    )
+    sessions = forms.IntegerField(min_value=1, max_value=2)
+
+    def __init__(self, *args, **kwargs):
+        self.program = kwargs.pop('program', None)
+        self.booking_id = kwargs.pop('booking_id', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_datetime(self):
+        datetime = self.cleaned_data['datetime']
+        if datetime < timezone.now():
+            raise forms.ValidationError("You cannot book in the past.")
+
+        conflict = Booking.objects.filter(
+            program=self.program,
+            time=datetime.time(),
+            date__date=datetime.date()
+        ).exclude(id=self.booking_id).exists()
+
+        if conflict:
+            raise forms.ValidationError("This time slot is already booked.")
+        return datetime
