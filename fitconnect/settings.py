@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'home',
     'programs',
     'subscriptions',
+    'django.contrib.sitemaps',
     
     # Other
     'widget_tweaks',

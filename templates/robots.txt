@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://fitconnect1-316796771f29.herokuapp.com/sitemap.xml
