@@ -30,7 +30,7 @@ if env_path.exists():
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -128,6 +128,12 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+BOOKING_DEFAULT_SERVICE_NAME = "Program Session"
+BOOKING_DEFAULT_SERVICE_DURATION = 60  # 2 per session
+BOOKING_DEFAULT_START_TIME = "08:00"
+BOOKING_DEFAULT_END_TIME = "18:00"
+BOOKING_DEFAULT_TIME_SLOT = 120  # minutes between slots
 
 
 STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY')

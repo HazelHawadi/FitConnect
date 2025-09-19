@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 600px;">
+  <div class="card shadow-sm p-4 text-center">
+    <h3 class="mb-3 text-danger">Confirm Deletion</h3>
+    <p>Are you sure you want to delete your booking for <strong>{{ booking.program.title }}</strong> on <strong>{{ booking.date.date }}</strong>?</p>
+
+    <form method="POST" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, Delete</button>
+      <a href="{% url 'my_bookings' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

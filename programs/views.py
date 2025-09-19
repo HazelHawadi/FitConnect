@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView
 from .models import Instructor
+from datetime import datetime, time as dt_time
+from django.contrib import messages
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -49,17 +51,37 @@ def program_detail(request, pk):
 
 @login_required
 def book_program(request, program_id):
-    program = get_object_or_404(Program, pk=program_id)
+    program = Program.objects.get(pk=program_id)
 
     if request.method == 'POST':
         form = BookingForm(request.POST, program=program)
         if form.is_valid():
-            request.session['booking_data'] = {
-                'program_id': program_id,
-                'date_id': form.cleaned_data['date'].id,
-                'sessions': form.cleaned_data['sessions'],
-            }
-            return redirect('confirm_booking')
+            booking_dt = form.cleaned_data['booking_datetime']
+            sessions = form.cleaned_data['sessions']
+
+            # Save AvailableDate entry or mark as booked
+            available_date, created = AvailableDate.objects.get_or_create(
+                program=program,
+                date=booking_dt.date(),
+                time=booking_dt.time()
+            )
+            available_date.is_booked = True
+            available_date.save()
+
+            total_cost = program.price_per_session * sessions
+
+            booking = Booking.objects.create(
+                user=request.user,
+                program=program,
+                date=available_date,
+                time=booking_dt.time(),
+                sessions=sessions,
+                total_cost=total_cost,
+                paid=False
+            )
+
+            return redirect('confirm_booking', booking_id=booking.id)
+
     else:
         form = BookingForm(program=program)
 
@@ -95,42 +117,39 @@ def create_checkout_session(request, program_id):
         return JsonResponse({'error': str(e)})
         
         
-def confirm_booking(request):
-    booking_data = request.session.get('booking_data')
-    if not booking_data:
-        return redirect('home')
-
-    program = get_object_or_404(Program, pk=booking_data['program_id'])
-    date = program.dates.get(id=booking_data['date_id'])
-    sessions = booking_data['sessions']
-
-    if program.price_per_session is None:
-        return render(request, 'error.html', {
-            'message': 'Program price is missing. Please contact support.'
-        })
-
-    total = float(program.price_per_session) * sessions
+@login_required
+def confirm_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    program = booking.program
+    date = booking.date
+    sessions = booking.sessions
+    total = booking.total_cost
 
     if request.method == 'POST':
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {
-                        'name': f"{program.title} on {date.date}",
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {'name': f"{program.title} on {date.date}"},
+                        'unit_amount': int(total * 100),
                     },
-                    'unit_amount': int(total * 100),
-                },
-                'quantity': 1,
-            }],
-            mode='payment',
-            success_url=request.build_absolute_uri('/booking/success/'),
-            cancel_url=request.build_absolute_uri('/programs/'),
-        )
-        return redirect(checkout_session.url, code=303)
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=request.build_absolute_uri(
+                    f"/programs/booking/success/?booking_id={booking.id}"
+                ),
+                cancel_url=request.build_absolute_uri(f"/programs/confirm-booking/{booking.id}/"),
+            )
+            return redirect(checkout_session.url, code=303)
+        except Exception as e:
+            messages.error(request, f"Stripe error: {e}")
+            return redirect('confirm_booking', booking_id=booking.id)
 
     return render(request, 'programs/confirm_booking.html', {
+        'booking': booking,
         'program': program,
         'date': date,
         'sessions': sessions,
@@ -163,34 +182,21 @@ def cache_booking_data(request):
         return HttpResponse(content=e, status=400)
     
 
+@login_required
 def booking_success(request):
-    booking_data = request.session.pop('booking_data', None)
-    if not booking_data:
-        return redirect('home')
+    booking_id = request.GET.get('booking_id')
+    if not booking_id:
+        messages.error(request, "Booking not found.")
+        return redirect('program_list')
 
-    program = get_object_or_404(Program, pk=booking_data['program_id'])
-    date = program.dates.get(id=booking_data['date_id'])
-    sessions = booking_data['sessions']
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    
+    # Mark booking as paid
+    if not booking.paid:
+        booking.paid = True
+        booking.save()
 
-    if program.price_per_session is None:
-        return render(request, 'error.html', {
-            'message': 'Program price is missing. Please contact support.'
-        })
-
-    total_cost = float(program.price_per_session) * sessions
-
-    booking = Booking.objects.create(
-        user=request.user,
-        program=program,
-        date=date,
-        sessions=sessions,
-        total_cost=total_cost,
-        paid=True
-    )
-
-    return render(request, 'programs/booking_success.html', {
-        'booking': booking
-    })
+    return render(request, 'programs/booking_success.html', {'booking': booking})
 
 
 def payment_success(request):
@@ -220,6 +226,18 @@ def my_bookings(request):
     bookings = user.bookings.all()
 
     return render(request, 'programs/my_bookings.html', {'bookings': bookings})
+
+
+@login_required
+def delete_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if request.method == 'POST':
+        booking.delete()
+        messages.success(request, "Booking deleted successfully.")
+        return redirect('my_bookings')
+
+    return render(request, 'programs/confirm_delete_booking.html', {'booking': booking})
 
 
 @login_required
