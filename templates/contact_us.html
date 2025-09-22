@@ -8,27 +8,39 @@
   })();
 
   window.onload = function () {
-    document.getElementById("contact-form").addEventListener("submit", function (event) {
-      event.preventDefault();
+    const form = document.getElementById("contact-form");
+    if (form) {
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
 
-      document.getElementById("success-message").classList.add("d-none");
-      document.getElementById("error-message").classList.add("d-none");
+        document.getElementById("success-message").classList.add("d-none");
+        document.getElementById("error-message").classList.add("d-none");
 
-      emailjs.sendForm("service_2qers5g", "template_tevg5sx", this)
-        .then(() => {
-          document.getElementById("success-message").classList.remove("d-none");
-          document.getElementById("contact-form").reset();
-        })
-        .catch((error) => {
-          console.error("FAILED...", error);
-          document.getElementById("error-message").classList.remove("d-none");
-        });
-    });
+        // Send via EmailJS
+        emailjs.sendForm("service_2qers5g", "template_tevg5sx", this)
+          .then(() => {
+            document.getElementById("success-message").classList.remove("d-none");
+          })
+          .catch((error) => {
+            console.error("FAILED...", error);
+            document.getElementById("error-message").classList.remove("d-none");
+          });
+
+        // Submit to Django backend as fallback
+        this.submit();
+      });
+    }
   };
 </script>
 
 <div class="container mt-5">
   <h2 class="text-center mb-4 text-primary">Contact Us</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
 
   <div id="success-message" class="alert alert-success d-none" role="alert">
     Message sent successfully!
@@ -37,27 +49,27 @@
     Message sending failed. Please try again later.
   </div>
 
-  <form id="contact-form" class="p-4 border rounded bg-white shadow">
-    <input type="hidden" name="time" value="{{ now|date:'M d Y H:i' }}" />
+  <form id="contact-form" method="post" class="p-4 border rounded bg-white shadow">
+    {% csrf_token %}
 
     <div class="mb-3">
-      <label for="contact-name" class="form-label">Name</label>
-      <input type="text" id="contact-name" name="name" class="form-control" required />
+      <label for="id_name" class="form-label">Name</label>
+      <input type="text" name="name" id="id_name" class="form-control" required>
     </div>
 
     <div class="mb-3">
-      <label for="contact-email" class="form-label">Email</label>
-      <input type="email" id="contact-email" name="email" class="form-control" required />
+      <label for="id_email" class="form-label">Email</label>
+      <input type="email" name="email" id="id_email" class="form-control" required>
     </div>
 
     <div class="mb-3">
-      <label for="contact-title" class="form-label">Subject</label>
-      <input type="text" id="contact-title" name="title" class="form-control" required />
+      <label for="id_subject" class="form-label">Subject</label>
+      <input type="text" name="subject" id="id_subject" class="form-control" required>
     </div>
 
     <div class="mb-3">
-      <label for="contact-message" class="form-label">Message</label>
-      <textarea id="contact-message" name="message" class="form-control" rows="4" required></textarea>
+      <label for="id_message" class="form-label">Message</label>
+      <textarea name="message" id="id_message" rows="4" class="form-control" required></textarea>
     </div>
 
     <button type="submit" class="btn btn-primary w-100">Send</button>

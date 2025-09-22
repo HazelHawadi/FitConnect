@@ -8,4 +8,7 @@ urlpatterns = [
     path('profile/', views.profile, name='account_profile'),
     path('pricing/', views.pricing, name='pricing'),
     path('update_profile/', views.update_profile, name='account_update_profile'),
+    path('contact/', views.contact_us, name='contact_us'),
+    path("newsletter/subscribe/", views.newsletter_subscribe, name="newsletter_subscribe"),
+    path("newsletter/unsubscribe/", views.newsletter_unsubscribe, name="newsletter_unsubscribe"),
 ]

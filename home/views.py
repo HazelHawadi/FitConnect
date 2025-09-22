@@ -3,11 +3,11 @@ from programs.models import Program
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
-from .forms import ProfileUpdateForm
+from .forms import ProfileUpdateForm, ContactForm, NewsletterForm
 from programs.models import Booking
 import requests
 from django.core.mail import send_mail
-from .models import NewsletterSubscriber
+from .models import NewsletterSubscriber, ContactMessage
 from subscriptions import views
 from subscriptions.models import Subscription
 from datetime import date
@@ -87,3 +87,53 @@ def update_profile(request):
         form = ProfileUpdateForm(instance=request.user)
     
     return render(request, 'account/update_profile.html', {'form': form})
+
+
+def contact_us(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()  # Save message in Database
+            messages.success(request, "Your message has been sent successfully!")
+            return redirect('contact_us')
+        else:
+            messages.error(request, "There was an error. Please check your input.")
+    else:
+        form = ContactForm()
+
+    return render(request, 'contact_us.html', {'form': form})
+
+
+def newsletter_subscribe(request):
+    if request.method == "POST":
+        form = NewsletterForm(request.POST)
+        if form.is_valid():
+            # Check if the user already has a subscription
+            if request.user.is_authenticated:
+                if NewsletterSubscriber.objects.filter(user=request.user).exists():
+                    messages.warning(request, "You are already subscribed.")
+                else:
+                    subscriber = form.save(commit=False)
+                    subscriber.user = request.user
+                    subscriber.save()
+                    messages.success(request, "Thanks for subscribing! 🎉")
+            else:
+                # For guests
+                form.save()
+                messages.success(request, "Thanks for subscribing! 🎉")
+        else:
+            messages.error(request, "This email is already subscribed.")
+        return redirect("home")
+    
+
+def newsletter_unsubscribe(request):
+    email = request.GET.get("email")
+    context = {"email": email, "unsubscribed": False}
+
+    if email and NewsletterSubscriber.objects.filter(email=email).exists():
+        NewsletterSubscriber.objects.filter(email=email).delete()
+        context["unsubscribed"] = True
+    else:
+        messages.warning(request, "This email was not found in our subscriber list.")
+
+    return render(request, "newsletter_unsubscribed.html", context)
