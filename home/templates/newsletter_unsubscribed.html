@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container text-center my-5">
+    <h2>You have successfully unsubscribed!</h2>
+    <p>We're sorry to see you go. You will no longer receive our newsletter.</p>
+    <a href="{% url 'home' %}" class="btn btn-link mt-3">Back to Home</a>
+</div>
+{% endblock %}

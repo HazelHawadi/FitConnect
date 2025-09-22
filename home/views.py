@@ -5,6 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from .forms import ProfileUpdateForm
 from programs.models import Booking
+import requests
+from django.core.mail import send_mail
+from .models import NewsletterSubscriber
 from subscriptions import views
 from subscriptions.models import Subscription
 from datetime import date
@@ -13,6 +16,7 @@ from datetime import timedelta
 from django.contrib import messages
 import stripe
 from django.conf import settings
+
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 

@@ -87,10 +87,23 @@
                     </a>
                 </div>
             </div>
+            <form id="newsletter-form" class="d-flex">
+                <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+                <button type="submit" class="btn btn-outline-primary ms-2">Newsletter Subscribe</button>
+            </form>
+
+            <!-- Success and error alerts -->
+            <div id="newsletter-success" class="alert alert-success d-none mt-2">
+                Thanks for subscribing! 🎉
+            </div>
+            <div id="newsletter-error" class="alert alert-danger d-none mt-2">
+                Subscription failed. Please try again later.
+            </div>
             <div class="text-center py-3">
                 &copy; 2025 FitConnect. All rights reserved.
             </div>
         </div>
+
     </footer>
 
     <!-- Scripts -->
@@ -108,16 +121,16 @@
         document.addEventListener('DOMContentLoaded', function () {
             {% for message in messages %}
             const toastEl = document.createElement('div');
-            toastEl.className = 'toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3';
+            toastEl.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-3';
             toastEl.role = 'alert';
             toastEl.innerHTML = `
-        <div class="d-flex">
-          <div class="toast-body">
-            {{ message }}
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-      `;
+            <div class="d-flex">
+              <div class="toast-body">
+                {{ message }}
+              </div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
             document.body.appendChild(toastEl);
             const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
             toast.show();
@@ -125,6 +138,47 @@
         });
     </script>
     {% endif %}
+    <form id="newsletter-form" class="d-flex">
+        <input type="email" name="email" class="form-control" placeholder="Enter your email" required />
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+    </form>
+
+    <!-- Success + Error messages -->
+    <div id="newsletter-success" class="alert alert-success d-none mt-2">
+        Subscribed successfully!
+    </div>
+    <div id="newsletter-error" class="alert alert-danger d-none mt-2">
+        Subscription failed. Please try again.
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        (function () {
+            emailjs.init("klLYf-UFhoNFy8aWd");
+        })();
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const newsletterForm = document.getElementById("newsletter-form");
+            if (newsletterForm) {
+                newsletterForm.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    document.getElementById("newsletter-success").classList.add("d-none");
+                    document.getElementById("newsletter-error").classList.add("d-none");
+
+                    emailjs
+                        .sendForm("service_2qers5g", "template_05ge4jj", this)
+                        .then(() => {
+                            document.getElementById("newsletter-success").classList.remove("d-none");
+                            this.reset();
+                        })
+                        .catch((error) => {
+                            console.error("Newsletter error", error);
+                            document.getElementById("newsletter-error").classList.remove("d-none");
+                        });
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
