@@ -26,6 +26,14 @@ def home(request):
     return render(request, 'home/index.html', {'programs': programs})
 
 
+def privacy_policy(request):
+    return render(request, "privacy_content.html")
+
+
+def terms_conditions(request):
+    return render(request, "terms_content.html")
+
+
 @login_required
 def user_dashboard(request):
     user = request.user
@@ -108,21 +116,28 @@ def newsletter_subscribe(request):
     if request.method == "POST":
         form = NewsletterForm(request.POST)
         if form.is_valid():
-            # Check if the user already has a subscription
+            email = form.cleaned_data["email"]
+
             if request.user.is_authenticated:
+                # Block if this user already has a subscription
                 if NewsletterSubscriber.objects.filter(user=request.user).exists():
-                    messages.warning(request, "You are already subscribed.")
-                else:
-                    subscriber = form.save(commit=False)
+                    messages.warning(request, "You are already subscribed with your account.")
+                    return redirect("home")
+
+            try:
+                subscriber = form.save(commit=False)
+                if request.user.is_authenticated:
                     subscriber.user = request.user
-                    subscriber.save()
-                    messages.success(request, "Thanks for subscribing! 🎉")
-            else:
-                # For guests
-                form.save()
+                subscriber.save()
                 messages.success(request, "Thanks for subscribing! 🎉")
+            except IntegrityError:
+                # Catches DB-level duplicate email or duplicate user
+                messages.error(request, "This email or user is already subscribed.")
         else:
-            messages.error(request, "This email is already subscribed.")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, error)
+
         return redirect("home")
     
 

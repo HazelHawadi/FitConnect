@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <!-- Font Awesome (newer version) -->
+    <!-- Font Awesome newer version -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <!-- flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -26,7 +26,6 @@
 
 <body>
     <header>
-        <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
             <div class="container" style="max-width: 90%;">
                 <a class="navbar-brand font-weight-bold" href="{% url 'home' %}">FitConnect</a>
@@ -87,26 +86,229 @@
                     </a>
                 </div>
             </div>
-            <form id="newsletter-form" class="d-flex flex-column flex-md-row gap-2 mt-3">
+
+            <form id="newsletter-form" method="POST" action="{% url 'newsletter_subscribe' %}" class="d-flex gap-2">
+                {% csrf_token %}
                 <input type="text" name="name" class="form-control" placeholder="Your name" required>
                 <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
                 <button type="submit" class="btn btn-outline-primary">Subscribe</button>
             </form>
 
-            <div id="newsletter-success" class="alert alert-success d-none mt-2">
-                ✅ Subscribed successfully! Welcome aboard 🎉
-            </div>
-            <div id="newsletter-error" class="alert alert-danger d-none mt-2">
-                ❌ Failed to subscribe, please try again.
+            <div id="newsletter-success" class="alert alert-success d-none mt-2">✅ Subscribed successfully!</div>
+            <div id="newsletter-error" class="alert alert-danger d-none mt-2">❌ Failed to subscribe, please try again.
             </div>
 
             <div class="text-center py-3">
-                &copy; 2025 FitConnect. All rights reserved.
+                &copy; 2025 FitConnect. All rights reserved. |
+                <button type="button" class="btn btn-link p-0 mx-1" data-bs-toggle="modal"
+                    data-bs-target="#privacyModal">
+                    Privacy & Disclaimer
+                </button> |
+                <button type="button" class="btn btn-link p-0 mx-1" data-bs-toggle="modal" data-bs-target="#termsModal">
+                    Terms & Conditions
+                </button>
             </div>
         </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- Load core JS libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>emailjs.init("klLYf-UFhoNFy8aWd");</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Newsletter JS + backend fallback -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('newsletter-form');
+            const successEl = document.getElementById('newsletter-success');
+            const errorEl = document.getElementById('newsletter-error');
+
+            function getCsrfToken() {
+                const el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                return el ? el.value : '';
+            }
+
+            if (form) {
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    successEl.classList.add('d-none');
+                    errorEl.classList.add('d-none');
+
+                    // EmailJS UI send
+                    try {
+                        await emailjs.sendForm('service_2qers5g', 'template_05ge4jj', this);
+                    } catch (err) {
+                        console.error('EmailJS error (newsletter):', err);
+                    }
+
+                    // Backend for duplicate prevention etc.
+                    const action = this.getAttribute('action');
+                    const formData = new FormData(this);
+                    if (formData.has('email')) {
+                        formData.set('email', formData.get('email').trim().toLowerCase());
+                    }
+
+                    try {
+                        const response = await fetch(action, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCsrfToken()
+                            },
+                            body: formData,
+                            credentials: 'same-origin'
+                        });
+                        if (!response.ok) throw new Error('Backend error');
+                        successEl.classList.remove('d-none');
+                        this.reset();
+                    } catch (err) {
+                        console.error('Newsletter backend error:', err);
+                        errorEl.classList.remove('d-none');
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Toast messages -->
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+
+            {% for message in messages %}
+            (function () {
+                let bgClass = "bg-primary text-white";
+                {% if "success" in message.tags %} bgClass = "bg-success text-white"; {% elif "error" in message.tags or "danger" in message.tags %} bgClass = "bg-danger text-white"; {% elif "warning" in message.tags %} bgClass = "bg-warning text-dark"; {% elif "info" in message.tags %} bgClass = "bg-info text-dark"; {% endif %}
+                const toastEl = document.createElement('div');
+                toastEl.className = `toast align-items-center border-0 ${bgClass} mb-2`;
+                toastEl.role = 'alert';
+                toastEl.innerHTML = `
+              <div class="d-flex">
+                <div class="toast-body">{{ message }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+              </div>`;
+                toastContainer.appendChild(toastEl);
+                const t = new bootstrap.Toast(toastEl, { delay: 3000 });
+                t.show();
+            })();
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+
+    <!-- PRIVACY MODAL -->
+    <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="privacyModalLabel">Privacy Policy & Disclaimer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% include "home/privacy_content.html" %}
+                </div>
+                <div class="modal-footer" id="privacyModalFooter">
+                    <!-- Buttons will be inserted here by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERMS MODAL -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Terms & Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% include "home/terms_content.html" %}
+                </div>
+                <div class="modal-footer" id="termsModalFooter">
+                    <!-- Buttons inserted via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Terms & Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% include "home/terms_content.html" %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Decline</button>
+                    <button type="button" class="btn btn-primary" id="termsAcceptBtn"
+                        data-bs-dismiss="modal">Accept</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function setupConditionalFooter(modalId, storageKey, footerId, acceptBtnId, declineBtnId) {
+                const modalEl = document.getElementById(modalId);
+                const footerEl = document.getElementById(footerId);
+                if (!modalEl || !footerEl) return;
+
+                modalEl.addEventListener('show.bs.modal', function (event) {
+                    const accepted = localStorage.getItem(storageKey);
+
+                    // Clear footer contents
+                    footerEl.innerHTML = '';
+
+                    if (accepted) {
+                        // already accepted: only show a Close button
+                        const closeBtn = document.createElement('button');
+                        closeBtn.type = 'button';
+                        closeBtn.className = 'btn btn-primary';
+                        closeBtn.setAttribute('data-bs-dismiss', 'modal');
+                        closeBtn.textContent = 'Close';
+                        footerEl.appendChild(closeBtn);
+                    } else {
+                        // not accepted yet: show Decline + Accept
+                        const declineBtn = document.createElement('button');
+                        declineBtn.type = 'button';
+                        declineBtn.className = 'btn btn-secondary';
+                        declineBtn.setAttribute('data-bs-dismiss', 'modal');
+                        declineBtn.id = declineBtnId;
+                        declineBtn.textContent = 'Decline';
+
+                        const acceptBtn = document.createElement('button');
+                        acceptBtn.type = 'button';
+                        acceptBtn.className = 'btn btn-primary';
+                        acceptBtn.setAttribute('data-bs-dismiss', 'modal');
+                        acceptBtn.id = acceptBtnId;
+                        acceptBtn.textContent = 'Accept';
+
+                        footerEl.appendChild(declineBtn);
+                        footerEl.appendChild(acceptBtn);
+
+                        // Add event to acceptBtn to set localStorage
+                        acceptBtn.addEventListener('click', function () {
+                            localStorage.setItem(storageKey, 'true');
+                        });
+                    }
+                });
+            }
+
+            setupConditionalFooter('privacyModal', 'privacyAccepted', 'privacyModalFooter', 'privacyAcceptBtn', 'privacyDeclineBtn');
+            setupConditionalFooter('termsModal', 'termsAccepted', 'termsModalFooter', 'termsAcceptBtn', 'termsDeclineBtn');
+        });
+    </script>
+
+    <!-- AOS & flatpickr and other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -115,70 +317,6 @@
     </script>
 
     {% block postloadjs %}{% endblock %}
-
-    {% if messages %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-            document.body.appendChild(toastContainer);
-
-            {% for message in messages %}
-            const toastEl = document.createElement('div');
-
-            let bgClass = "bg-primary text-white";
-            {% if "success" in message.tags %}
-            bgClass = "bg-success text-white";
-            {% elif "error" in message.tags or "danger" in message.tags %}
-            bgClass = "bg-danger text-white";
-            {% elif "warning" in message.tags %}
-            bgClass = "bg-warning text-dark";
-            {% elif "info" in message.tags %}
-            bgClass = "bg-info text-dark";
-            {% endif %}
-
-            toastEl.className = `toast align-items-center border-0 ${bgClass} mb-2`;
-            toastEl.role = 'alert';
-            toastEl.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    {{ message }}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-            toastContainer.appendChild(toastEl);
-            const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
-            toast.show();
-            {% endfor %}
-        });
-    </script>
-    {% endif %}
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script>
-        (function () {
-            emailjs.init("klLYf-UFhoNFy8aWd");
-        })();
-
-        document.getElementById("newsletter-form").addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            // Hide old messages
-            document.getElementById("newsletter-success").classList.add("d-none");
-            document.getElementById("newsletter-error").classList.add("d-none");
-
-            emailjs.sendForm("service_2qers5g", "template_05ge4jj", this)
-                .then(() => {
-                    document.getElementById("newsletter-success").classList.remove("d-none");
-                    this.reset();
-                })
-                .catch((err) => {
-                    console.error("EmailJS Error:", err);
-                    document.getElementById("newsletter-error").classList.remove("d-none");
-                });
-        });
-    </script>
 </body>
 
 </html>

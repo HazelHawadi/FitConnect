@@ -1,0 +1,56 @@
+{% load static %}
+
+{% block extra_title %} | Privacy & Disclaimer {% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Privacy Policy & Disclaimer</h1>
+    <p><strong>Effective Date:</strong> {{ now|date:"F d, Y" }}</p>
+
+    <h3>1. Information We Collect</h3>
+    <ul>
+        <li>Account details (name, email, phone number, login info)</li>
+        <li>Bookings, subscriptions, and payment data (processed via Stripe)</li>
+        <li>Messages sent through our contact forms and newsletter sign-ups</li>
+        <li>Usage data (IP address, device info, site activity)</li>
+    </ul>
+
+    <h3>2. How We Use Your Information</h3>
+    <ul>
+        <li>Provide access to classes, subscriptions, and your account</li>
+        <li>Process secure payments and renewals</li>
+        <li>Send updates, confirmations, and newsletters (if opted-in)</li>
+        <li>Improve our platform and user experience</li>
+    </ul>
+
+    <h3>3. Sharing of Information</h3>
+    <p>We never sell your data. Limited sharing may occur with service providers (Stripe, EmailJS) or when required by law.</p>
+
+    <h3>4. Cookies & Tracking</h3>
+    <p>We use cookies for login sessions and analytics. Disabling cookies may affect site features.</p>
+
+    <h3>5. Your Rights</h3>
+    <ul>
+        <li>Access, update, or delete your personal data</li>
+        <li>Opt out of newsletters at any time</li>
+    </ul>
+
+    <h3>6. Data Security</h3>
+    <p>We use SSL encryption and trusted third parties (Stripe, EmailJS) to protect your data.</p>
+
+    <hr class="my-5">
+
+    <h2>Disclaimer</h2>
+    <p>
+        FitConnect programs and classes are for informational purposes only and are not a substitute for professional medical advice. 
+        Always consult your doctor before starting any new fitness program. 
+    </p>
+    <p>
+        We do not guarantee specific results, and participation is at your own risk. 
+        FitConnect is not liable for injuries, damages, or losses related to the use of our site or programs.
+    </p>
+    <p>
+        Our site may link to third-party websites. We are not responsible for their content or privacy practices.
+    </p>
+</div>
+{% endblock %}
