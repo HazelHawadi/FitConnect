@@ -127,13 +127,17 @@ def newsletter_subscribe(request):
     
 
 def newsletter_unsubscribe(request):
-    email = request.GET.get("email")
-    context = {"email": email, "unsubscribed": False}
+    email = request.GET.get('email', None)
 
-    if email and NewsletterSubscriber.objects.filter(email=email).exists():
-        NewsletterSubscriber.objects.filter(email=email).delete()
-        context["unsubscribed"] = True
+    if email:
+        # Remove subscriber if exists
+        try:
+            subscriber = NewsletterSubscriber.objects.get(email=email)
+            subscriber.delete()
+            messages.success(request, "You have been unsubscribed.")
+        except NewsletterSubscriber.DoesNotExist:
+            messages.error(request, "That email is not subscribed.")
     else:
-        messages.warning(request, "This email was not found in our subscriber list.")
+        messages.error(request, "No email specified to unsubscribe.")
 
-    return render(request, "newsletter_unsubscribed.html", context)
+    return render(request, 'newsletter_unsubscribed.html', {'email': email})

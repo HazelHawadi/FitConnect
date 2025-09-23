@@ -1,15 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container text-center py-5">
-    {% if unsubscribed %}
-        <h2 class="text-success">You’ve been unsubscribed ✅</h2>
-        <p>{{ email }} has been removed from our newsletter list.</p>
+  <div class="container mt-5 text-center">
+    {% if email %}
+      <h2 class="text-success">You’re unsubscribed!</h2>
+      <p>{{ email }} has been removed from our newsletter list.</p>
     {% else %}
-        <h2 class="text-danger">Unsubscribe failed ❌</h2>
-        <p>This email was not found in our records.</p>
+      <h2 class="text-warning">Unsubscribed?</h2>
+      <p>We couldn’t find the email to unsubscribe. Please check the link or contact us.</p>
     {% endif %}
-
     <a href="{% url 'home' %}" class="btn btn-primary mt-3">Back to Home</a>
-</div>
+  </div>
 {% endblock %}
