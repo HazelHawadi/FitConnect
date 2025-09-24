@@ -222,8 +222,8 @@ if 'USE_AWS' in os.environ:
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
 
-    STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-    DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
+    STATICFILES_STORAGE = 'fitconnect.custom_storages.StaticStorage'
+    DEFAULT_FILE_STORAGE = 'fitconnect.custom_storages.MediaStorage'
 
 elif 'CLOUDINARY_URL' in os.environ:
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
