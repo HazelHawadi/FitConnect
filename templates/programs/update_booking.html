@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Update Booking for {{ booking.program.title }}</h2>
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label for="booking_datetime" class="form-label">Choose a date & time:</label>
+      {{ form.booking_datetime }}
+    </div>
+
+    <div class="mb-3">
+      <label for="sessions" class="form-label">Number of sessions:</label>
+      {{ form.sessions }}
+    </div>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a href="{% url 'my_bookings' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    flatpickr("#booking_datetime", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      minDate: "today",
+      time_24hr: false,
+      minuteIncrement: 120,
+      minTime: "08:00",
+      maxTime: "18:00",
+      disable: [
+        {% for date in available_dates %}
+          {% if date.is_booked %}
+            "{{ date.date }} {{ date.time }}",
+          {% endif %}
+        {% endfor %}
+      ]
+    });
+  });
+</script>
+{% endblock %}

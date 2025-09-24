@@ -19,8 +19,9 @@
         <p><strong>Sessions:</strong> {{ booking.sessions }}</p>
         <p><strong>Total Cost:</strong> ${{ booking.total_cost }}</p>
         <div class="booking-actions mt-3">
-          <a href="{% url 'program_detail' pk=booking.program.id %}" class="btn btn-outline-primary btn-sm me-2">Update
-            Booking</a>
+          <a href="{% url 'update_booking' booking.id %}" class="btn btn-outline-primary btn-sm me-2">
+            Update Booking
+          </a>
           <a href="{% url 'delete_booking' booking_id=booking.id %}" class="btn btn-outline-danger btn-sm me-2">Delete
             Booking</a>
 

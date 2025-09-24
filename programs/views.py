@@ -229,6 +229,60 @@ def my_bookings(request):
 
 
 @login_required
+def update_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if request.method == 'POST':
+        form = BookingForm(request.POST, program=booking.program)
+        if form.is_valid():
+            booking_dt = form.cleaned_data['booking_datetime']
+            sessions = form.cleaned_data['sessions']
+
+            # Free up the old slot
+            if booking.date:
+                booking.date.is_booked = False
+                booking.date.save()
+
+            # Assign the new slot
+            available_date, created = AvailableDate.objects.get_or_create(
+                program=booking.program,
+                date=booking_dt.date(),
+                time=booking_dt.time()
+            )
+            available_date.is_booked = True
+            available_date.save()
+
+            booking.date = available_date
+            booking.time = booking_dt.time()
+
+            if not booking.paid:
+                booking.sessions = sessions
+                booking.total_cost = booking.program.price_per_session * sessions
+
+            booking.save()
+            messages.success(request, "Booking updated successfully!")
+            return redirect('my_bookings')
+    else:
+        form = BookingForm(
+            initial={
+                'booking_datetime': datetime.combine(booking.date.date, booking.time),
+                'sessions': booking.sessions,
+            },
+            program=booking.program
+        )
+
+    available_dates = AvailableDate.objects.filter(program=booking.program).exclude(
+        id=booking.date.id
+    )
+
+    return render(request, 'programs/update_booking.html', {
+        'form': form,
+        'booking': booking,
+        'available_dates': available_dates,
+    })
+
+
+@login_required
 def delete_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
