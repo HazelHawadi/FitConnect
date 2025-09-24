@@ -2,7 +2,13 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Leave a Review for "{{ program.title }}"</h2>
+    <h2>
+        {% if review %}
+            Edit Your Review for "{{ program.title }}"
+        {% else %}
+            Leave a Review for "{{ program.title }}"
+        {% endif %}
+    </h2>
 
     <div class="row">
         <div class="col-md-8 offset-md-2">
@@ -11,31 +17,27 @@
                 <div class="mb-3">
                     <label for="rating" class="form-label">Rating</label>
                     <div id="rating" class="star-rating">
-                        <input type="radio" id="star5" name="rating" value="5" />
-                        <label for="star5" class="star">&#9733;</label>
-                        <input type="radio" id="star4" name="rating" value="4" />
-                        <label for="star4" class="star">&#9733;</label>
-                        <input type="radio" id="star3" name="rating" value="3" />
-                        <label for="star3" class="star">&#9733;</label>
-                        <input type="radio" id="star2" name="rating" value="2" />
-                        <label for="star2" class="star">&#9733;</label>
-                        <input type="radio" id="star1" name="rating" value="1" />
-                        <label for="star1" class="star">&#9733;</label>
+                        {% for i in "54321" %}
+                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" 
+                                {% if review and review.rating|stringformat:"s" == i %}checked{% endif %} />
+                            <label for="star{{ i }}" class="star">&#9733;</label>
+                        {% endfor %}
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label for="comment" class="form-label">Your Comment</label>
-                    <textarea name="comment" id="comment" class="form-control" rows="5" placeholder="Write your review here" required>{{ review.comment }}</textarea>
+                    <textarea name="comment" id="comment" class="form-control" rows="5" placeholder="Write your review here" required>{% if review %}{{ review.comment }}{% endif %}</textarea>
                 </div>
 
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                    <button type="submit" class="btn btn-primary">
+                        {% if review %}Update Review{% else %}Submit Review{% endif %}
+                    </button>
                     <a href="{% url 'program_detail' program.id %}" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
 {% endblock %}

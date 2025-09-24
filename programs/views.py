@@ -305,7 +305,7 @@ def add_review(request, program_id):
             existing_review.rating = request.POST.get('rating')
             existing_review.comment = request.POST.get('comment')
             existing_review.save()
-            return redirect('program_detail', program_id=program.id)
+            return redirect('program_detail', pk=program.id)
         else:
             return render(request, 'programs/add_review.html', {'review': existing_review, 'program': program})
 
@@ -325,8 +325,24 @@ def delete_review(request, program_id):
     review = get_object_or_404(Review, program_id=program_id, user=request.user)
     if request.method == 'POST':
         review.delete()
-        return redirect('program_detail', program_id=program_id)
+        return redirect('program_detail', pk=program_id)
     return render(request, 'programs/confirm_delete_review.html', {'review': review})
+
+
+@login_required
+def edit_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id, user=request.user)
+    if request.method == 'POST':
+        review.rating = request.POST.get('rating')
+        review.comment = request.POST.get('comment')
+        review.save()
+        messages.success(request, "Your review was updated successfully.")
+        return redirect('program_detail', pk=review.program.id)
+    
+    return render(request, 'programs/add_review.html', {
+        'review': review,
+        'program': review.program
+    })
 
 
 def program_list(request):
