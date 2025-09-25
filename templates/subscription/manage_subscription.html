@@ -11,70 +11,69 @@
                     <h3 class="card-title mb-4 text-center">My Subscription</h3>
 
                     {% if subscription %}
-                    <ul class="list-group list-group-flush mb-4">
-                        <li class="list-group-item">
-                            <strong>Plan:</strong> {{ subscription.plan_name }}
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Start Date:</strong> {{ subscription.start_date }}
-                        </li>
-                        <li class="list-group-item">
-                            <strong>End Date:</strong> {{ subscription.end_date|default:"Ongoing" }}
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Status:</strong>
-                            {% if is_active %}
-                            {% if subscription.active %}
-                            <span class="badge bg-success">Active</span>
-                            {% else %}
-                            <span class="badge bg-warning text-dark">
-                                Canceled – ends on {{ subscription.end_date }}
-                            </span>
-                            {% endif %}
-                            {% else %}
-                            <span class="badge bg-danger">Inactive</span>
-                            {% endif %}
-                        </li>
-                    </ul>
+                        <ul class="list-group list-group-flush mb-4">
+                            <li class="list-group-item">
+                                <strong>Plan:</strong> {{ subscription.plan_name }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Start Date:</strong> {{ subscription.start_date }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>End Date:</strong> {{ subscription.end_date|default:"Ongoing" }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Status:</strong>
+                                {% if is_active %}
+                                    {% if subscription.active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">
+                                            Canceled – ends on {{ subscription.end_date }}
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </li>
+                        </ul>
 
-                    {% if is_active %}
-                    <div class="d-flex justify-content-between">
-                        {% if subscription.active %}
-                        <form method="post" action="{% url 'subscriptions:cancel_subscription' %}">
-                            {% csrf_token %}
-                            <button type="submit" name="cancel" class="btn btn-outline-danger">
-                                Cancel Subscription
-                            </button>
-                        </form>
-                        {% endif %}
-
-                        <!-- Change Plan Dropdown -->
-                        {% if subscription.active %}
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown">
-                                Change Plan
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item"
-                                        href="{% url 'subscriptions:change_plan' 'Basic' %}">Basic</a></li>
-                                <li><a class="dropdown-item" href="{% url 'subscriptions:change_plan' 'Pro' %}">Pro</a>
-                                </li>
-                                <li><a class="dropdown-item"
-                                        href="{% url 'subscriptions:change_plan' 'Elite' %}">Elite</a></li>
+                        <!-- Plan Benefits -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold">Your Plan Benefits:</h5>
+                            <ul class="list-unstyled ms-3">
+                                {% for benefit in subscription.benefits %}
+                                    <li class="mb-2">
+                                        <i class="bi bi-check2-circle text-success me-2"></i>{{ benefit }}
+                                    </li>
+                                {% empty %}
+                                    <li class="text-muted">No benefits available for this plan.</li>
+                                {% endfor %}
                             </ul>
                         </div>
+
+                        {% if subscription.active %}
+                            {% if cancellation_scheduled %}
+                                <button class="btn btn-secondary" disabled>
+                                    Cancellation Scheduled (ends {{ subscription.end_date }})
+                                </button>
+                            {% else %}
+                                <form method="post" action="{% url 'subscriptions:cancel_subscription' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" name="cancel" class="btn btn-outline-danger">
+                                        Cancel Subscription
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted">Your subscription has ended.</p>
+                            <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-primary w-100">Renew Subscription</a>
                         {% endif %}
-                    </div>
-                    {% else %}
-                    <p class="text-muted">Your subscription has ended.</p>
-                    <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-primary w-100">Renew Subscription</a>
-                    {% endif %}
 
                     {% else %}
-                    <p class="text-center">You currently do not have an active subscription.</p>
-                    <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-success w-100">Subscribe Now</a>
+                        <p class="text-center">You currently do not have an active subscription.</p>
+                        <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-success w-100">Subscribe Now</a>
                     {% endif %}
+
                 </div>
             </div>
         </div>

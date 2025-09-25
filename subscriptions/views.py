@@ -194,63 +194,6 @@ def subscription_success(request):
     return render(request, 'subscription/success.html')
 
 
-@login_required
-def change_plan(request, plan_name):
-    subscription = get_object_or_404(Subscription, user=request.user)
-
-    plan_order = ["Basic", "Pro", "Elite"]
-    current_plan = subscription.plan_name
-
-    try:
-        if plan_name == current_plan:
-            messages.info(request, f"You are already on the {plan_name} plan.")
-            return redirect("subscriptions:manage_subscription")
-
-        # Get current subscription from Stripe
-        stripe_sub = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
-        sub_item_id = stripe_sub['items']['data'][0].id
-
-        is_upgrade = plan_order.index(plan_name) > plan_order.index(current_plan)
-
-        updated_sub = stripe.Subscription.modify(
-            subscription.stripe_subscription_id,
-            items=[{
-                "id": sub_item_id,
-                "price": PLAN_PRICES[plan_name],
-            }],
-            proration_behavior="create_prorations",
-        )
-
-        # charge if upgrade
-        if is_upgrade:
-            invoice = stripe.Invoice.create(
-                customer=updated_sub.customer,
-                subscription=updated_sub.id,
-                description=f"Proration for upgrade to {plan_name}"
-            )
-            stripe.Invoice.finalize_invoice(invoice.id)
-
-        # Update DB
-        subscription.plan_name = plan_name
-        subscription.benefits = plan_benefits(plan_name)
-        subscription.save()
-
-        if is_upgrade:
-            messages.success(
-                request,
-                f"Successfully upgraded to {plan_name}! You’ve been charged the prorated difference."
-            )
-        else:
-            messages.success(
-                request,
-                f"Successfully downgraded to {plan_name}. Changes will apply from your next billing cycle."
-            )
-
-    except Exception as e:
-        messages.error(request, f"Error changing plan: {str(e)}")
-
-    return redirect("subscriptions:manage_subscription")
-
 
 @login_required
 def cancel_subscription(request):
