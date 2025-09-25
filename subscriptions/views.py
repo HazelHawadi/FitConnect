@@ -105,8 +105,9 @@ def stripe_webhook(request):
             return JsonResponse({'error': 'User not found'}, status=404)
 
         stripe_sub = stripe.Subscription.retrieve(session['subscription'])
-        period_start = timezone.make_aware(datetime.fromtimestamp(stripe_sub['current_period_start']))
-        period_end = timezone.make_aware(datetime.fromtimestamp(stripe_sub['current_period_end']))
+
+        period_start = datetime.fromtimestamp(stripe_sub['current_period_start'], tz=timezone.utc).date()
+        period_end = datetime.fromtimestamp(stripe_sub['current_period_end'], tz=timezone.utc).date()
 
         Subscription.objects.update_or_create(
             user=user,
@@ -116,7 +117,7 @@ def stripe_webhook(request):
                 "start_date": period_start,
                 "end_date": period_end,
                 "renewal_date": period_end,
-                "active": stripe_sub['status'] == "active",
+                "active": stripe_sub['status'] in ["active", "trialing"],
                 "benefits": plan_benefits(plan_name),
             }
         )
@@ -125,21 +126,19 @@ def stripe_webhook(request):
         sub = event['data']['object']
         subscription = Subscription.objects.filter(stripe_subscription_id=sub['id']).first()
         if subscription:
-            period_start = timezone.make_aware(datetime.fromtimestamp(sub['current_period_start']))
-            period_end = timezone.make_aware(datetime.fromtimestamp(sub['current_period_end']))
-            subscription.plan_name = sub['items']['data'][0]['price']['nickname']
+            period_start = datetime.fromtimestamp(sub['current_period_start'], tz=timezone.utc).date()
+            period_end = datetime.fromtimestamp(sub['current_period_end'], tz=timezone.utc).date()
             subscription.start_date = period_start
             subscription.end_date = period_end
             subscription.renewal_date = period_end
-            subscription.active = sub['status'] == "active"
-            subscription.benefits = plan_benefits(subscription.plan_name)
+            subscription.active = sub['status'] in ["active", "trialing"]
             subscription.save()
 
     elif event['type'] == 'customer.subscription.deleted':
         sub = event['data']['object']
         Subscription.objects.filter(stripe_subscription_id=sub['id']).update(
             active=False,
-            end_date=timezone.make_aware(datetime.fromtimestamp(sub['current_period_end']))
+            end_date=datetime.fromtimestamp(sub['current_period_end'], tz=timezone.utc).date()
         )
 
     return JsonResponse({'status': 'success'})
