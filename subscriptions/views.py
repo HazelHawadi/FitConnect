@@ -4,7 +4,7 @@ from .models import Subscription
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.conf import settings
 import stripe
 from django.contrib.auth.models import User
@@ -40,10 +40,17 @@ def subscribe(request, plan_name):
                 'quantity': 1,
             }],
             mode='subscription',
-            success_url=request.build_absolute_uri(reverse('subscriptions:subscription_success')),
+            success_url=request.build_absolute_uri(
+                reverse('subscriptions:subscription_success')
+            ) + "?session_id={CHECKOUT_SESSION_ID}",
             cancel_url=request.build_absolute_uri(reverse('subscriptions:pricing_view')),
+            metadata={
+                "user_id": user.id,
+                "plan_name": plan_name,
+            },
         )
-        return redirect(checkout_session.url)
+        return redirect(checkout_session.url, code=303)
+
     except Exception as e:
         messages.error(request, f"Stripe error: {e}")
         return redirect('subscriptions:pricing_view')
@@ -53,22 +60,18 @@ def subscribe(request, plan_name):
 def manage_subscription(request):
     subscription = Subscription.objects.filter(user=request.user).first()
 
-    try:
-        if subscription:
-            if subscription.stripe_subscription_id:
-                if subscription.end_date is None or subscription.end_date > timezone.now():
-                    is_active = True
-                else:
-                    is_active = False
-            else:
-                is_active = False
+    if subscription:
+        try:
+            is_active = subscription.is_active()
+            if not subscription.stripe_subscription_id:
                 messages.error(request, "No Stripe subscription ID found.")
-        else:
+        except Exception as e:
+            messages.error(request, f"An error occurred while checking your subscription: {e}")
             is_active = False
-            messages.error(request, "Subscription not found.")
-    except Exception as e:
-        messages.error(request, f"An error occurred while checking your subscription: {e}")
+    else:
+        subscription = None
         is_active = False
+        messages.error(request, "Subscription not found.")
 
     plan_name = subscription.plan_name if subscription else 'Basic'
     subscribe_url = reverse('subscriptions:subscribe', kwargs={'plan_name': plan_name})
@@ -83,21 +86,62 @@ def manage_subscription(request):
 @csrf_exempt
 def stripe_webhook(request):
     payload = request.body
-    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
-    except ValueError as e:
-        return JsonResponse({'error': 'Invalid payload'}, status=400)
-    except stripe.error.SignatureVerificationError as e:
-        return JsonResponse({'error': 'Invalid signature'}, status=400)
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except (ValueError, stripe.error.SignatureVerificationError):
+        return JsonResponse({'error': 'Invalid payload/signature'}, status=400)
 
-    if event['type'] == 'payment_intent.succeeded':
-        payment_intent = event['data']['object']
-        
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        user_id = session['metadata'].get('user_id')
+        plan_name = session['metadata'].get('plan_name')
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+        stripe_sub = stripe.Subscription.retrieve(session['subscription'])
+        period_start = timezone.make_aware(datetime.fromtimestamp(stripe_sub['current_period_start']))
+        period_end = timezone.make_aware(datetime.fromtimestamp(stripe_sub['current_period_end']))
+
+        Subscription.objects.update_or_create(
+            user=user,
+            defaults={
+                "plan_name": plan_name,
+                "stripe_subscription_id": stripe_sub.id,
+                "start_date": period_start,
+                "end_date": period_end,
+                "renewal_date": period_end,
+                "active": stripe_sub['status'] == "active",
+                "benefits": plan_benefits(plan_name),
+            }
+        )
+
+    elif event['type'] == 'customer.subscription.updated':
+        sub = event['data']['object']
+        subscription = Subscription.objects.filter(stripe_subscription_id=sub['id']).first()
+        if subscription:
+            period_start = timezone.make_aware(datetime.fromtimestamp(sub['current_period_start']))
+            period_end = timezone.make_aware(datetime.fromtimestamp(sub['current_period_end']))
+            subscription.plan_name = sub['items']['data'][0]['price']['nickname']
+            subscription.start_date = period_start
+            subscription.end_date = period_end
+            subscription.renewal_date = period_end
+            subscription.active = sub['status'] == "active"
+            subscription.benefits = plan_benefits(subscription.plan_name)
+            subscription.save()
+
+    elif event['type'] == 'customer.subscription.deleted':
+        sub = event['data']['object']
+        Subscription.objects.filter(stripe_subscription_id=sub['id']).update(
+            active=False,
+            end_date=timezone.make_aware(datetime.fromtimestamp(sub['current_period_end']))
+        )
+
     return JsonResponse({'status': 'success'})
 
 
@@ -150,3 +194,44 @@ def pricing_view(request):
 @login_required
 def subscription_success(request):
     return render(request, 'subscription/success.html')
+
+
+@login_required
+def change_plan(request):
+    subscription = Subscription.objects.filter(user=request.user).first()
+    if not subscription or not subscription.active:
+        messages.error(request, "No active subscription found.")
+        return redirect('subscriptions:manage_subscription')
+
+    if request.method == "POST":
+        new_plan = request.POST.get("plan")
+        current_plan = subscription.plan_name
+
+        if new_plan == current_plan:
+            messages.info(request, "You are already on this plan.")
+            return redirect('subscriptions:manage_subscription')
+
+        # Upgrade logic
+        plan_order = ["Basic", "Pro", "Elite"]
+        if plan_order.index(new_plan) > plan_order.index(current_plan):
+            # Call Stripe to update subscription immediately (user pays difference)
+            stripe.Subscription.modify(
+                subscription.stripe_subscription_id,
+                items=[{
+                    'id': stripe.Subscription.retrieve(subscription.stripe_subscription_id)['items']['data'][0].id,
+                    'price': PLAN_PRICES[new_plan],
+                }],
+                proration_behavior='create_prorations'
+            )
+            messages.success(request, f"Successfully upgraded to {new_plan}!")
+        
+        else:
+            # Downgrade only allow after end of period
+            messages.warning(request, f"You can only downgrade to {new_plan} after your current cycle ends.")
+        
+        return redirect('subscriptions:manage_subscription')
+
+    return render(request, "subscription/change_plan.html", {
+        "current_plan": subscription.plan_name,
+        "plans": PLAN_PRICES.keys(),
+    })

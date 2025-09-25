@@ -699,6 +699,24 @@ h1 {
 }
 
 
+/* Position the Most Popular badge */
+.popular-card {
+    position: relative;
+}
+
+.popular-badge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.popular-badge .badge {
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+}
+
 /* Responsive */
 @media (max-width: 767px) {
     .img-fluid.rounded-circle {

@@ -2,38 +2,74 @@
 
 {% load i18n %}
 {% load account socialaccount %}
+{% load widget_tweaks %}
 
 {% block head_title %}{% trans "Sign In to FitConnect" %}{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-  <h1 class="auth-title">{% trans "Welcome Back to FitConnect" %}</h1>
-  <p class="auth-subtitle">Log in to book programs, manage bookings, and connect with instructors.</p>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow-lg p-4" style="max-width: 450px; width: 100%;">
+    <h2 class="text-center mb-3">{% trans "Welcome Back to FitConnect" %}</h2>
+    <p class="text-center text-muted mb-4">
+      Log in to book programs, manage bookings, and connect with instructors.
+    </p>
 
-  {% get_providers as socialaccount_providers %}
-  {% if socialaccount_providers %}
-    <div class="socialaccount_ballot">
-      <ul class="socialaccount_providers">
+    {% get_providers as socialaccount_providers %}
+    {% if socialaccount_providers %}
+    <div class="mb-4">
+      <ul class="list-unstyled d-flex justify-content-center gap-2">
         {% include "socialaccount/snippets/provider_list.html" with process="login" %}
       </ul>
-      <div class="login-or">{% trans "or" %}</div>
+      <div class="text-center text-muted my-2">{% trans "or" %}</div>
     </div>
     {% include "socialaccount/snippets/login_extra.html" %}
-  {% endif %}
-
-  <form method="POST" action="{% url 'account_login' %}" class="auth-form">
-    {% csrf_token %}
-    {{ form.as_p }}
-    {% if redirect_field_value %}
-      <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+    {% if form.errors %}
+    <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+      {{ form.errors }}
+    </div>
     {% endif %}
 
-    <div class="auth-actions">
-      <a href="{% url 'account_reset_password' %}" class="auth-link">{% trans "Forgot Password?" %}</a>
-      <button type="submit" class="auth-button">{% trans "Sign In" %}</button>
-    </div>
-  </form>
+    <form method="POST" action="{% url 'account_login' %}" novalidate>
+      {% csrf_token %}
 
-  <p class="auth-footer">Don't have an account? <a href="{{ signup_url }}">Sign up here</a>.</p>
+      <!-- Login Field -->
+      <div class="mb-3">
+        <label class="form-label">{{ form.login.label }}</label>
+        {{ form.login|add_class:"form-control" }}
+        {% if form.login.errors %}
+        <div class="text-danger small">{{ form.login.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label class="form-label">{{ form.password.label }}</label>
+        {{ form.password|add_class:"form-control" }}
+        {% if form.password.errors %}
+        <div class="text-danger small">{{ form.password.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Remember Me -->
+      <div class="mb-3 form-check">
+        {{ form.remember|add_class:"form-check-input" }}
+        <label class="form-check-label">{{ form.remember.label }}</label>
+      </div>
+
+      {% if redirect_field_value %}
+      <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+      {% endif %}
+
+      <button type="submit" class="btn btn-primary w-100">
+        {% trans "Sign In" %}
+      </button>
+    </form>
+
+    <div class="d-flex justify-content-between mt-3">
+      <a href="{% url 'account_reset_password' %}" class="small">{% trans "Forgot Password?" %}</a>
+      <a href="{{ signup_url }}" class="small">{% trans "Sign Up" %}</a>
+    </div>
+  </div>
 </div>
 {% endblock %}
