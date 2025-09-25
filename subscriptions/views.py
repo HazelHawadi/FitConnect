@@ -80,6 +80,7 @@ def manage_subscription(request):
         'subscription': subscription,
         'is_active': is_active,
         'subscribe_url': subscribe_url,
+        'today': timezone.now().date(),
     })
 
 
@@ -196,41 +197,66 @@ def subscription_success(request):
 
 
 @login_required
-def change_plan(request):
+def change_plan(request, plan_name):
     subscription = Subscription.objects.filter(user=request.user).first()
     if not subscription or not subscription.active:
         messages.error(request, "No active subscription found.")
         return redirect('subscriptions:manage_subscription')
 
-    if request.method == "POST":
-        new_plan = request.POST.get("plan")
-        current_plan = subscription.plan_name
+    current_plan = subscription.plan_name
 
-        if new_plan == current_plan:
-            messages.info(request, "You are already on this plan.")
-            return redirect('subscriptions:manage_subscription')
+    if plan_name == current_plan:
+        messages.info(request, f"You are already on the {plan_name} plan.")
+        return redirect('subscriptions:manage_subscription')
 
-        # Upgrade logic
-        plan_order = ["Basic", "Pro", "Elite"]
-        if plan_order.index(new_plan) > plan_order.index(current_plan):
-            # Call Stripe to update subscription immediately (user pays difference)
+    plan_order = ["Basic", "Pro", "Elite"]
+
+    try:
+        if plan_order.index(plan_name) > plan_order.index(current_plan):
+            # Upgrade immediately in Stripe
             stripe.Subscription.modify(
                 subscription.stripe_subscription_id,
                 items=[{
                     'id': stripe.Subscription.retrieve(subscription.stripe_subscription_id)['items']['data'][0].id,
-                    'price': PLAN_PRICES[new_plan],
+                    'price': PLAN_PRICES[plan_name],
                 }],
                 proration_behavior='create_prorations'
             )
-            messages.success(request, f"Successfully upgraded to {new_plan}!")
-        
+            # Update locally
+            subscription.plan_name = plan_name
+            subscription.benefits = plan_benefits(plan_name)
+            subscription.save()
+
+            messages.success(request, f"Successfully upgraded to {plan_name}!")
         else:
-            # Downgrade only allow after end of period
-            messages.warning(request, f"You can only downgrade to {new_plan} after your current cycle ends.")
-        
+            # Downgrade rule
+            messages.warning(request, f"You can only downgrade to {plan_name} after your current billing cycle ends.")
+
+    except Exception as e:
+        messages.error(request, f"Error changing plan: {e}")
+
+    return redirect('subscriptions:manage_subscription')
+
+
+@login_required
+def cancel_subscription(request):
+    subscription = Subscription.objects.filter(user=request.user).first()
+
+    if not subscription or not subscription.stripe_subscription_id:
+        messages.error(request, "No active subscription found.")
         return redirect('subscriptions:manage_subscription')
 
-    return render(request, "subscription/change_plan.html", {
-        "current_plan": subscription.plan_name,
-        "plans": PLAN_PRICES.keys(),
-    })
+    if request.method == "POST":
+        try:
+            # Cancel immediately
+            stripe.Subscription.delete(subscription.stripe_subscription_id)
+
+            subscription.active = False
+            subscription.end_date = timezone.now().date()
+            subscription.save()
+
+            messages.success(request, "Your subscription has been canceled immediately.")
+        except Exception as e:
+            messages.error(request, f"Error canceling subscription: {e}")
+
+    return redirect('subscriptions:manage_subscription')
