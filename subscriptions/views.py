@@ -60,18 +60,18 @@ def subscribe(request, plan_name):
 def manage_subscription(request):
     subscription = Subscription.objects.filter(user=request.user).first()
 
-    if subscription:
+    cancellation_scheduled = False
+    if subscription and subscription.stripe_subscription_id:
         try:
+            stripe_sub = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
+            cancellation_scheduled = stripe_sub.cancel_at_period_end
             is_active = subscription.is_active()
-            if not subscription.stripe_subscription_id:
-                messages.error(request, "No Stripe subscription ID found.")
         except Exception as e:
-            messages.error(request, f"An error occurred while checking your subscription: {e}")
+            messages.error(request, f"An error occurred: {e}")
             is_active = False
     else:
         subscription = None
         is_active = False
-        messages.error(request, "Subscription not found.")
 
     plan_name = subscription.plan_name if subscription else 'Basic'
     subscribe_url = reverse('subscriptions:subscribe', kwargs={'plan_name': plan_name})
@@ -81,6 +81,7 @@ def manage_subscription(request):
         'is_active': is_active,
         'subscribe_url': subscribe_url,
         'today': timezone.now().date(),
+        'cancellation_scheduled': cancellation_scheduled,
     })
 
 
@@ -186,10 +187,7 @@ def pricing_view(request):
         ],
     }
 
-    return render(request, 'subscription/pricing.html', {
-        'plan_benefits': plan_benefits
-    })
-
+    return render(request, "subscriptions/pricing.html", {"plan_benefits": plan_benefits})
 
 @login_required
 def subscription_success(request):
@@ -198,44 +196,60 @@ def subscription_success(request):
 
 @login_required
 def change_plan(request, plan_name):
-    subscription = Subscription.objects.filter(user=request.user).first()
-    if not subscription or not subscription.active:
-        messages.error(request, "No active subscription found.")
-        return redirect('subscriptions:manage_subscription')
-
-    current_plan = subscription.plan_name
-
-    if plan_name == current_plan:
-        messages.info(request, f"You are already on the {plan_name} plan.")
-        return redirect('subscriptions:manage_subscription')
+    subscription = get_object_or_404(Subscription, user=request.user)
 
     plan_order = ["Basic", "Pro", "Elite"]
+    current_plan = subscription.plan_name
 
     try:
-        if plan_order.index(plan_name) > plan_order.index(current_plan):
-            # Upgrade immediately in Stripe
-            stripe.Subscription.modify(
-                subscription.stripe_subscription_id,
-                items=[{
-                    'id': stripe.Subscription.retrieve(subscription.stripe_subscription_id)['items']['data'][0].id,
-                    'price': PLAN_PRICES[plan_name],
-                }],
-                proration_behavior='create_prorations'
-            )
-            # Update locally
-            subscription.plan_name = plan_name
-            subscription.benefits = plan_benefits(plan_name)
-            subscription.save()
+        if plan_name == current_plan:
+            messages.info(request, f"You are already on the {plan_name} plan.")
+            return redirect("subscriptions:manage_subscription")
 
-            messages.success(request, f"Successfully upgraded to {plan_name}!")
+        # Get current subscription from Stripe
+        stripe_sub = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
+        sub_item_id = stripe_sub['items']['data'][0].id
+
+        is_upgrade = plan_order.index(plan_name) > plan_order.index(current_plan)
+
+        updated_sub = stripe.Subscription.modify(
+            subscription.stripe_subscription_id,
+            items=[{
+                "id": sub_item_id,
+                "price": PLAN_PRICES[plan_name],
+            }],
+            proration_behavior="create_prorations",
+        )
+
+        # charge if upgrade
+        if is_upgrade:
+            invoice = stripe.Invoice.create(
+                customer=updated_sub.customer,
+                subscription=updated_sub.id,
+                description=f"Proration for upgrade to {plan_name}"
+            )
+            stripe.Invoice.finalize_invoice(invoice.id)
+
+        # Update DB
+        subscription.plan_name = plan_name
+        subscription.benefits = plan_benefits(plan_name)
+        subscription.save()
+
+        if is_upgrade:
+            messages.success(
+                request,
+                f"Successfully upgraded to {plan_name}! You’ve been charged the prorated difference."
+            )
         else:
-            # Downgrade rule
-            messages.warning(request, f"You can only downgrade to {plan_name} after your current billing cycle ends.")
+            messages.success(
+                request,
+                f"Successfully downgraded to {plan_name}. Changes will apply from your next billing cycle."
+            )
 
     except Exception as e:
-        messages.error(request, f"Error changing plan: {e}")
+        messages.error(request, f"Error changing plan: {str(e)}")
 
-    return redirect('subscriptions:manage_subscription')
+    return redirect("subscriptions:manage_subscription")
 
 
 @login_required
@@ -248,15 +262,21 @@ def cancel_subscription(request):
 
     if request.method == "POST":
         try:
-            # Cancel immediately
-            stripe.Subscription.delete(subscription.stripe_subscription_id)
+            # Cancel at the end of the billing cycle instead of immediately
+            stripe.Subscription.modify(
+                subscription.stripe_subscription_id,
+                cancel_at_period_end=True
+            )
 
             subscription.active = False
-            subscription.end_date = timezone.now().date()
+            subscription.end_date = subscription.renewal_date  # keep benefits until renewal date
             subscription.save()
 
-            messages.success(request, "Your subscription has been canceled immediately.")
+            messages.success(
+                request,
+                "Your subscription will remain active until the end of your current billing cycle."
+            )
         except Exception as e:
-            messages.error(request, f"Error canceling subscription: {e}")
+            messages.error(request, f"Error scheduling cancellation: {e}")
 
     return redirect('subscriptions:manage_subscription')

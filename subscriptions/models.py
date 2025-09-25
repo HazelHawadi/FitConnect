@@ -17,7 +17,8 @@ class Subscription(models.Model):
         return f"{self.plan_name} for {self.user.username}"
 
     def is_active(self):
-        return self.active and self.renewal_date >= timezone.now().date()
+        today = timezone.now().date()
+        return (self.active or (self.end_date and self.end_date >= today))
 
     def days_until_renewal(self):
         return (self.renewal_date - timezone.now().date()).days

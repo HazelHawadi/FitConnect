@@ -68,12 +68,12 @@
                     </div>
                     {% else %}
                     <p class="text-muted">Your subscription has ended.</p>
-                    <a href="{{ subscribe_url }}" class="btn btn-primary w-100">Renew Subscription</a>
+                    <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-primary w-100">Renew Subscription</a>
                     {% endif %}
 
                     {% else %}
                     <p class="text-center">You currently do not have an active subscription.</p>
-                    <a href="{{ subscribe_url }}" class="btn btn-success w-100">Subscribe Now</a>
+                    <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-success w-100">Subscribe Now</a>
                     {% endif %}
                 </div>
             </div>

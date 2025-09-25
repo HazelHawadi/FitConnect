@@ -698,6 +698,23 @@ h1 {
     padding-left: 0;
 }
 
+.plan-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 1rem;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+    }
+
+    .popular-card {
+        border-width: 2px;
+    }
+
+    .elite-card {
+        background: linear-gradient(135deg, #fff5f5, #ffecec);
+    }
 
 /* Position the Most Popular badge */
 .popular-card {

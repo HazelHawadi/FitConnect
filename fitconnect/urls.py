@@ -28,7 +28,6 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('', include('programs.urls')),
     path('programs/', include('programs.urls')),
-    path('subscription/', include('subscriptions.urls', namespace='subscriptions')),
     path("webhooks/stripe/", stripe_webhook, name="stripe-webhook"),
     path("contact/", TemplateView.as_view(template_name="contact_us.html"), name="contact_us"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
