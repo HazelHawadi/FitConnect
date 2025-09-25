@@ -40,7 +40,7 @@
                     {% if is_active %}
                     <div class="d-flex justify-content-between">
                         {% if subscription.active %}
-                        <form method="post">
+                        <form method="post" action="{% url 'subscriptions:cancel_subscription' %}">
                             {% csrf_token %}
                             <button type="submit" name="cancel" class="btn btn-outline-danger">
                                 Cancel Subscription
@@ -57,11 +57,11 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item"
-                                        href="{% url 'subscriptions:change_plan' %}?plan=Basic">Basic</a></li>
+                                        href="{% url 'subscriptions:change_plan' 'Basic' %}">Basic</a></li>
+                                <li><a class="dropdown-item" href="{% url 'subscriptions:change_plan' 'Pro' %}">Pro</a>
+                                </li>
                                 <li><a class="dropdown-item"
-                                        href="{% url 'subscriptions:change_plan' %}?plan=Pro">Pro</a></li>
-                                <li><a class="dropdown-item"
-                                        href="{% url 'subscriptions:change_plan' %}?plan=Elite">Elite</a></li>
+                                        href="{% url 'subscriptions:change_plan' 'Elite' %}">Elite</a></li>
                             </ul>
                         </div>
                         {% endif %}
