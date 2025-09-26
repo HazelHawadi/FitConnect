@@ -1,0 +1,33 @@
+[33mcommit b40a9d451974d091cebcce706046860f7f85280a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/backup-2025-09-26[m[33m, [m[1;31mheroku/main[m[33m, [m[1;31mheroku/HEAD[m[33m, [m[1;32mbackup-2025-09-26[m[33m)[m
+Author: HazelHawadi <hawadihazel@icloud.com>
+Date:   Fri Sep 26 11:21:28 2025 +0100
+
+    Hotfix: direct /subscriptions/pricing/ link to avoid NoReverseMatch on prod
+
+[1mdiff --git a/home/templates/dashboard/dashboard.html b/home/templates/dashboard/dashboard.html[m
+[1mindex 85305b3..c80cf51 100644[m
+[1m--- a/home/templates/dashboard/dashboard.html[m
+[1m+++ b/home/templates/dashboard/dashboard.html[m
+[36m@@ -68,8 +68,7 @@[m
+                         class="btn btn-outline-warning btn-sm mt-2">Manage Subscription</a>[m
+                     {% else %}[m
+                     <p class="text-muted">No active subscription.</p>[m
+[31m-                    <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-outline-warning btn-sm">Subscribe[m
+[31m-                        Now</a>[m
+[32m+[m[32m                    <a href="/subscriptions/pricing/" class="btn btn-outline-warning btn-sm">Subscribe Now</a>[m
+                     {% endif %}[m
+                 </div>[m
+             </div>[m
+[1mdiff --git a/templates/base.html b/templates/base.html[m
+[1mindex c4827e8..18faad3 100644[m
+[1m--- a/templates/base.html[m
+[1m+++ b/templates/base.html[m
+[36m@@ -41,7 +41,7 @@[m
+                         <li class="nav-item"><a class="nav-link" href="{% url 'instructors_list' %}">Instructors</a>[m
+                         </li>[m
+                         <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>[m
+[31m-                        <li class="nav-item"><a class="nav-link" href="{% url 'subscriptions:pricing_view' %}">Subscribe</a></li>[m
+[32m+[m[32m                        <li class="nav-item"><a class="nav-link" href="/subscriptions/pricing/">Subscribe</a></li>[m
+                         <li class="nav-item"><a class="nav-link" href="{% url 'contact_us' %}">Contact Us</a></li>[m
+                     </ul>[m
+                     <ul class="navbar-nav ms-5">[m
