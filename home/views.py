@@ -78,7 +78,6 @@ def user_dashboard(request):
     context = {
         'upcoming_bookings': upcoming_bookings,
         'subscription': subscription,
-        'is_active': subscription.is_active() if subscription else False,
         'recent_activity': recent_activity,
     }
 

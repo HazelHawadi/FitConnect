@@ -17,12 +17,14 @@ class Subscription(models.Model):
         return f"{self.plan_name} for {self.user.username}"
 
     def is_valid(self):
-        
         today = timezone.now().date()
         return self.active and (self.end_date is None or self.end_date.date() >= today)
 
+    @property
+    def is_active(self):
+        return self.is_valid()
+
     def days_until_renewal(self):
-       
         if not self.renewal_date:
             return None
         return (self.renewal_date.date() - timezone.now().date()).days

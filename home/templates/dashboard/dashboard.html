@@ -45,35 +45,34 @@
                     <i class="bi bi-credit-card-2-back dashboard-icon text-warning"></i>
                     <h5 class="card-title mt-2">Subscription Plan</h5>
                     {% if subscription %}
-                    <p class="mb-1"><strong>{{ subscription.plan_name }}</strong></p>
+                        <p class="mb-1"><strong>{{ subscription.plan_name }}</strong></p>
 
-                    <!-- Active / Inactive Status -->
-                    <p class="{% if is_active %}text-success{% else %}text-danger{% endif %}">
-                        {% if is_active %} Active {% else %} Inactive {% endif %}
-                    </p>
+                        <!-- Active / Inactive Status -->
+                        <p class="{% if subscription.is_active %}text-success{% else %}text-danger{% endif %}">
+                            {% if subscription.is_active %} Active {% else %} Inactive {% endif %}
+                        </p>
 
-                    <p class="text-muted">Renews on {{ subscription.renewal_date }}</p>
+                        <p class="text-muted">Renews on {{ subscription.renewal_date }}</p>
 
-                    <!-- Show Benefits -->
-                    {% if subscription.benefits %}
-                    <h6 class="mt-3">Benefits:</h6>
-                    <ul class="list-unstyled small">
-                        {% for benefit in subscription.benefits %}
-                        <li>✔️ {{ benefit }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
+                        <!-- Show Benefits -->
+                        {% if subscription.benefits %}
+                        <h6 class="mt-3">Benefits:</h6>
+                        <ul class="list-unstyled small">
+                            {% for benefit in subscription.benefits %}
+                            <li>✔️ {{ benefit }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
 
-                    <a href="{% url 'subscriptions:manage_subscription' %}"
-                        class="btn btn-outline-warning btn-sm mt-2">Manage Subscription</a>
+                        <a href="{% url 'subscriptions:manage_subscription' %}"
+                            class="btn btn-outline-warning btn-sm mt-2">Manage Subscription</a>
                     {% else %}
-                    <p class="text-muted">No active subscription.</p>
-                    <a href="/subscriptions/pricing/" class="btn btn-outline-warning btn-sm">Subscribe Now</a>
+                        <p class="text-muted">No active subscription.</p>
+                        <a href="/subscriptions/pricing/" class="btn btn-outline-warning btn-sm">Subscribe Now</a>
                     {% endif %}
                 </div>
             </div>
         </div>
-
 
     </div>
 
