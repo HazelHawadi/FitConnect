@@ -97,7 +97,7 @@ def pricing(request):
         {'name': 'Pro', 'price': '$25/month', 'duration_days': 30},
         {'name': 'Elite', 'price': '$50/month', 'duration_days': 30},
     ]
-    return render(request, 'subscription/pricing.html', {'plans': plans})
+    return render(request, 'subscriptions/pricing.html', {'plans': plans})
 
 
 @login_required
