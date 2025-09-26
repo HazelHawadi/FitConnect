@@ -1,4 +1,5 @@
 import stripe
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Program, AvailableDate, Booking, Review
 from django.contrib.auth.decorators import login_required
@@ -202,8 +203,9 @@ def booking_success(request):
 def payment_success(request):
     program_id = request.GET.get('program_id')
     program = get_object_or_404(Program, id=program_id)
-    date = get_program_date(program)
-    total = calculate_total(program)
+
+    date = AvailableDate.objects.filter(program=program).first()
+    total = program.price_per_session
 
     return render(request, 'payment_success.html', {
         'program': program,

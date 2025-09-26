@@ -5,6 +5,18 @@
   <form method="post">
     {% csrf_token %}
 
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      <ul>
+        {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
     <div class="mb-3">
       <label for="booking_datetime" class="form-label">Choose a date & time:</label>
       {{ form.booking_datetime }}
@@ -21,7 +33,7 @@
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     flatpickr("#booking_datetime", {
       enableTime: true,
       dateFormat: "Y-m-d H:i",
@@ -34,8 +46,8 @@
         {% for date in available_dates %}
           {% if date.is_booked %}
             "{{ date.date }} {{ date.time }}",
-          {% endif %}
-        {% endfor %}
+    {% endif %}
+    {% endfor %}
       ]
     });
   });
