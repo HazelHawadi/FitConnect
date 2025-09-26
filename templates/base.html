@@ -91,7 +91,7 @@
                 {% csrf_token %}
                 <input type="text" name="name" class="form-control" placeholder="Your name" required>
                 <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
-                <button type="submit" class="btn btn-outline-primary">Subscribe</button>
+                <button type="submit" class="btn btn-outline-primary">Newsletter Subscribe</button>
             </form>
 
             <div id="newsletter-success" class="alert alert-success d-none mt-2">✅ Subscribed successfully!</div>
@@ -142,7 +142,6 @@
                         console.error('EmailJS error (newsletter):', err);
                     }
 
-                    // Backend for duplicate prevention etc.
                     const action = this.getAttribute('action');
                     const formData = new FormData(this);
                     if (formData.has('email')) {
@@ -210,8 +209,20 @@
                 <div class="modal-body">
                     {% include "home/privacy_content.html" %}
                 </div>
-                <div class="modal-footer" id="privacyModalFooter">
-                    <!-- Buttons will be inserted here by JS -->
+                <div class="modal-footer">
+                    {% if user.is_authenticated %}
+                    {% if user.useragreement.accepted_privacy %}
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    {% else %}
+                    <form method="post" action="{% url 'accept_terms' %}">
+                        {% csrf_token %}
+                        <button type="submit" name="accept_privacy" class="btn btn-success">Accept</button>
+                    </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Decline</button>
+                    {% endif %}
+                    {% else %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -228,85 +239,24 @@
                 <div class="modal-body">
                     {% include "home/terms_content.html" %}
                 </div>
-                <div class="modal-footer" id="termsModalFooter">
-                    <!-- Buttons inserted via JS -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Terms Modal -->
-    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="termsModalLabel">Terms & Conditions</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    {% include "home/terms_content.html" %}
-                </div>
                 <div class="modal-footer">
+                    {% if user.is_authenticated %}
+                    {% if user.useragreement.accepted_terms %}
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    {% else %}
+                    <form method="post" action="{% url 'accept_terms' %}">
+                        {% csrf_token %}
+                        <button type="submit" name="accept_terms" class="btn btn-success">Accept</button>
+                    </form>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Decline</button>
-                    <button type="button" class="btn btn-primary" id="termsAcceptBtn"
-                        data-bs-dismiss="modal">Accept</button>
+                    {% endif %}
+                    {% else %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            function setupConditionalFooter(modalId, storageKey, footerId, acceptBtnId, declineBtnId) {
-                const modalEl = document.getElementById(modalId);
-                const footerEl = document.getElementById(footerId);
-                if (!modalEl || !footerEl) return;
-
-                modalEl.addEventListener('show.bs.modal', function (event) {
-                    const accepted = localStorage.getItem(storageKey);
-
-                    // Clear footer contents
-                    footerEl.innerHTML = '';
-
-                    if (accepted) {
-                        // already accepted: only show a Close button
-                        const closeBtn = document.createElement('button');
-                        closeBtn.type = 'button';
-                        closeBtn.className = 'btn btn-primary';
-                        closeBtn.setAttribute('data-bs-dismiss', 'modal');
-                        closeBtn.textContent = 'Close';
-                        footerEl.appendChild(closeBtn);
-                    } else {
-                        // not accepted yet: show Decline + Accept
-                        const declineBtn = document.createElement('button');
-                        declineBtn.type = 'button';
-                        declineBtn.className = 'btn btn-secondary';
-                        declineBtn.setAttribute('data-bs-dismiss', 'modal');
-                        declineBtn.id = declineBtnId;
-                        declineBtn.textContent = 'Decline';
-
-                        const acceptBtn = document.createElement('button');
-                        acceptBtn.type = 'button';
-                        acceptBtn.className = 'btn btn-primary';
-                        acceptBtn.setAttribute('data-bs-dismiss', 'modal');
-                        acceptBtn.id = acceptBtnId;
-                        acceptBtn.textContent = 'Accept';
-
-                        footerEl.appendChild(declineBtn);
-                        footerEl.appendChild(acceptBtn);
-
-                        // Add event to acceptBtn to set localStorage
-                        acceptBtn.addEventListener('click', function () {
-                            localStorage.setItem(storageKey, 'true');
-                        });
-                    }
-                });
-            }
-
-            setupConditionalFooter('privacyModal', 'privacyAccepted', 'privacyModalFooter', 'privacyAcceptBtn', 'privacyDeclineBtn');
-            setupConditionalFooter('termsModal', 'termsAccepted', 'termsModalFooter', 'termsAcceptBtn', 'termsDeclineBtn');
-        });
-    </script>
 
     <!-- AOS & flatpickr and other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>

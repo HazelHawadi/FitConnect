@@ -76,7 +76,7 @@ def manage_subscription(request):
     plan_name = subscription.plan_name if subscription else 'Basic'
     subscribe_url = reverse('subscriptions:subscribe', kwargs={'plan_name': plan_name})
 
-    return render(request, 'subscription/manage_subscription.html', {
+    return render(request, 'subscriptions/manage_subscription.html', {
         'subscription': subscription,
         'is_active': is_active,
         'subscribe_url': subscribe_url,
@@ -191,7 +191,7 @@ def pricing_view(request):
 
 @login_required
 def subscription_success(request):
-    return render(request, 'subscription/success.html')
+    return render(request, 'subscriptions/success.html')
 
 
 

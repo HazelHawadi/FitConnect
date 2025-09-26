@@ -1,6 +1,21 @@
 from django.conf import settings
 import uuid
 from django.db import models
+from django.utils import timezone
+
+
+class UserAgreement(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="useragreement"
+    )
+    accepted_privacy = models.BooleanField(default=False)
+    accepted_terms = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Agreements for {self.user.username}"
 
 class NewsletterSubscriber(models.Model):
     user = models.OneToOneField(
@@ -16,7 +31,6 @@ class NewsletterSubscriber(models.Model):
     def save(self, *args, **kwargs):
         self.email = self.email.strip().lower()
         super().save(*args, **kwargs)
-    
 
 class ContactMessage(models.Model):
     name = models.CharField(max_length=100)

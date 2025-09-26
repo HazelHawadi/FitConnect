@@ -7,7 +7,7 @@ from .forms import ProfileUpdateForm, ContactForm, NewsletterForm
 from programs.models import Booking
 import requests
 from django.core.mail import send_mail
-from .models import NewsletterSubscriber, ContactMessage
+from .models import NewsletterSubscriber, ContactMessage, UserAgreement
 from subscriptions import views
 from subscriptions.models import Subscription
 from datetime import date
@@ -24,6 +24,23 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 def home(request):
     programs = Program.objects.all()
     return render(request, 'home/index.html', {'programs': programs})
+
+
+@login_required
+def accept_terms(request):
+    if request.method == "POST":
+        agreement, created = UserAgreement.objects.get_or_create(user=request.user)
+
+        # Check which button was clicked
+        if "accept_privacy" in request.POST:
+            agreement.accepted_privacy = True
+            messages.success(request, "You have accepted the Privacy Policy.")
+        elif "accept_terms" in request.POST:
+            agreement.accepted_terms = True
+            messages.success(request, "You have accepted the Terms & Conditions.")
+
+        agreement.save()
+    return redirect(request.META.get("HTTP_REFERER", "home"))
 
 
 def privacy_policy(request):
