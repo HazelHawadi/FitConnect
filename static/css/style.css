@@ -716,6 +716,14 @@ h1 {
         background: linear-gradient(135deg, #fff5f5, #ffecec);
     }
 
+    .pricing-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .pricing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
 /* Position the Most Popular badge */
 .popular-card {
     position: relative;

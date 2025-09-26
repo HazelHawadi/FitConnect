@@ -3,33 +3,28 @@
 
 {% block content %}
 <div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow border-0 rounded-3">
-                <div class="card-body p-4">
 
-                    <h3 class="card-title mb-4 text-center">My Subscription</h3>
+    <h2 class="text-center mb-5 fw-bold">💎 Choose Your Plan</h2>
 
-                    {% if subscription %}
+    <!-- Show subscription details if user has one -->
+    {% if subscription %}
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8">
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4 text-center text-primary">My Subscription</h3>
+
                         <ul class="list-group list-group-flush mb-4">
-                            <li class="list-group-item">
-                                <strong>Plan:</strong> {{ subscription.plan_name }}
-                            </li>
-                            <li class="list-group-item">
-                                <strong>Start Date:</strong> {{ subscription.start_date }}
-                            </li>
-                            <li class="list-group-item">
-                                <strong>End Date:</strong> {{ subscription.end_date|default:"Ongoing" }}
-                            </li>
+                            <li class="list-group-item"><strong>Plan:</strong> {{ subscription.plan_name }}</li>
+                            <li class="list-group-item"><strong>Start Date:</strong> {{ subscription.start_date }}</li>
+                            <li class="list-group-item"><strong>End Date:</strong> {{ subscription.end_date|default:"Ongoing" }}</li>
                             <li class="list-group-item">
                                 <strong>Status:</strong>
                                 {% if is_active %}
                                     {% if subscription.active %}
                                         <span class="badge bg-success">Active</span>
                                     {% else %}
-                                        <span class="badge bg-warning text-dark">
-                                            Canceled – ends on {{ subscription.end_date }}
-                                        </span>
+                                        <span class="badge bg-warning text-dark">Canceled – ends on {{ subscription.end_date }}</span>
                                     {% endif %}
                                 {% else %}
                                     <span class="badge bg-danger">Inactive</span>
@@ -37,14 +32,11 @@
                             </li>
                         </ul>
 
-                        <!-- Plan Benefits -->
                         <div class="mb-4">
-                            <h5 class="fw-bold">Your Plan Benefits:</h5>
+                            <h5 class="fw-bold text-secondary">Your Plan Benefits:</h5>
                             <ul class="list-unstyled ms-3">
                                 {% for benefit in subscription.benefits %}
-                                    <li class="mb-2">
-                                        <i class="bi bi-check2-circle text-success me-2"></i>{{ benefit }}
-                                    </li>
+                                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>{{ benefit }}</li>
                                 {% empty %}
                                     <li class="text-muted">No benefits available for this plan.</li>
                                 {% endfor %}
@@ -53,42 +45,46 @@
 
                         {% if subscription.active %}
                             {% if cancellation_scheduled %}
-                                <button class="btn btn-secondary" disabled>
+                                <button class="btn btn-secondary w-100" disabled>
                                     Cancellation Scheduled (ends {{ subscription.end_date }})
                                 </button>
                             {% else %}
                                 <form method="post" action="{% url 'subscriptions:cancel_subscription' %}">
                                     {% csrf_token %}
-                                    <button type="submit" name="cancel" class="btn btn-outline-danger">
-                                        Cancel Subscription
-                                    </button>
+                                    <button type="submit" class="btn btn-outline-danger w-100">Cancel Subscription</button>
                                 </form>
                             {% endif %}
-
-                            <!-- Change Plan Dropdown -->
-                            <div class="dropdown mt-3">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    Change Plan
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'subscriptions:change_plan' 'Basic' %}">Basic</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'subscriptions:change_plan' 'Pro' %}">Pro</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'subscriptions:change_plan' 'Elite' %}">Elite</a></li>
-                                </ul>
-                            </div>
                         {% else %}
                             <p class="text-muted">Your subscription has ended.</p>
-                            <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-primary w-100">Renew Subscription</a>
                         {% endif %}
-
-                    {% else %}
-                        <p class="text-center">You currently do not have an active subscription.</p>
-                        <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-success w-100">Subscribe Now</a>
-                    {% endif %}
-
+                    </div>
                 </div>
             </div>
         </div>
+    {% endif %}
+
+    <!-- Pricing Plans -->
+    <div class="row text-center">
+        {% for plan, benefits in plan_benefits.items %}
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-lg border-0 rounded-4 h-100 pricing-card">
+                    <div class="card-body d-flex flex-column p-4">
+                        <h4 class="card-title fw-bold mb-3 text-primary">{{ plan|title }}</h4>
+                        
+                        <ul class="list-unstyled flex-grow-1 mb-4 text-start">
+                            {% for benefit in benefits %}
+                                <li class="mb-2"><i class="bi bi-check-lg text-success me-2"></i>{{ benefit }}</li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <a href="{% url 'subscriptions:subscribe' plan %}" class="btn btn-outline-primary w-100 mt-auto">
+                            Subscribe to {{ plan|title }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
     </div>
+
 </div>
 {% endblock %}

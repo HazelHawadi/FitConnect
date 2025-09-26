@@ -12,6 +12,7 @@ from subscriptions import views
 from subscriptions.models import Subscription
 from datetime import date
 from django.utils import timezone
+from django.db.models import Q
 from datetime import timedelta
 from django.contrib import messages
 import stripe
@@ -55,20 +56,29 @@ def terms_conditions(request):
 def user_dashboard(request):
     user = request.user
 
+    # Get upcoming bookings
     upcoming_bookings = Booking.objects.filter(
         user=user,
         date__date__gte=date.today()
     ).order_by('date__date')[:5]
 
-    subscription = Subscription.objects.filter(user=user).last()
+    # Get the user's active subscription
+    subscription = Subscription.objects.filter(
+        user=user,
+        active=True
+    ).filter(
+        Q(end_date__isnull=True) | Q(end_date__gte=timezone.now())
+    ).first()
 
     recent_activity = [
-        f"Booked class: {b.program.title} on {b.date.date}" for b in upcoming_bookings
+        f"Booked class: {b.program.title} on {b.date.date.strftime('%Y-%m-%d')} at {b.date.time.strftime('%I:%M %p')}"
+        for b in upcoming_bookings
     ]
 
     context = {
         'upcoming_bookings': upcoming_bookings,
         'subscription': subscription,
+        'is_active': subscription.is_active() if subscription else False,
         'recent_activity': recent_activity,
     }
 

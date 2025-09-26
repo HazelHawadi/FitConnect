@@ -11,14 +11,18 @@ class Subscription(models.Model):
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)
     stripe_subscription_id = models.CharField(max_length=100, blank=True, null=True)
-    benefits = models.JSONField(default=list)\
+    benefits = models.JSONField(default=list)
 
     def __str__(self):
         return f"{self.plan_name} for {self.user.username}"
 
-    def is_active(self):
+    def is_valid(self):
+        
         today = timezone.now().date()
-        return (self.active or (self.end_date and self.end_date >= today))
+        return self.active and (self.end_date is None or self.end_date.date() >= today)
 
     def days_until_renewal(self):
-        return (self.renewal_date - timezone.now().date()).days
+       
+        if not self.renewal_date:
+            return None
+        return (self.renewal_date.date() - timezone.now().date()).days
