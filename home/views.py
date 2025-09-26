@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
 from programs.models import Program
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.decorators import login_required
@@ -182,3 +183,8 @@ def newsletter_unsubscribe(request):
         messages.error(request, "No email specified to unsubscribe.")
 
     return render(request, 'newsletter_unsubscribed.html', {'email': email})
+
+
+def robots_txt(request):
+    content = render(request, "robots.txt", content_type="text/plain")
+    return content
