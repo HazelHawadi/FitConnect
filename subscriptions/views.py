@@ -202,7 +202,45 @@ def pricing_view(request):
 
 @login_required
 def subscription_success(request):
-    return render(request, 'subscriptions/success.html')
+    session_id = request.GET.get("session_id")
+    if not session_id:
+        messages.error(request, "No Stripe session found.")
+        return redirect("subscriptions:pricing_view")
+
+    try:
+        # Retrieve Stripe checkout session
+        session = stripe.checkout.Session.retrieve(session_id)
+        stripe_sub = stripe.Subscription.retrieve(session.subscription)
+        plan_name = session.metadata.get("plan_name", "Basic")
+
+        # Subscription dates
+        period_start = datetime.fromtimestamp(
+            stripe_sub['current_period_start'], tz=timezone.utc
+        ).date()
+        period_end = datetime.fromtimestamp(
+            stripe_sub['current_period_end'], tz=timezone.utc
+        ).date()
+
+        # Save or update subscription in DB
+        Subscription.objects.update_or_create(
+            user=request.user,
+            defaults={
+                "plan_name": plan_name,
+                "stripe_subscription_id": stripe_sub.id,
+                "start_date": period_start,
+                "end_date": period_end,
+                "renewal_date": period_end,
+                "active": stripe_sub['status'] in ["active", "trialing"],
+                "benefits": plan_benefits(plan_name),
+            }
+        )
+
+        messages.success(request, f"🎉 Your {plan_name} plan is active until {period_end}")
+
+    except Exception as e:
+        messages.error(request, f"Error activating subscription: {e}")
+
+    return render(request, "subscriptions/success.html")
 
 
 
