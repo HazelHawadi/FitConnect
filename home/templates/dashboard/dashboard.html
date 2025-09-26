@@ -68,8 +68,7 @@
                         class="btn btn-outline-warning btn-sm mt-2">Manage Subscription</a>
                     {% else %}
                     <p class="text-muted">No active subscription.</p>
-                    <a href="{% url 'subscriptions:pricing_view' %}" class="btn btn-outline-warning btn-sm">Subscribe
-                        Now</a>
+                    <a href="/subscriptions/pricing/" class="btn btn-outline-warning btn-sm">Subscribe Now</a>
                     {% endif %}
                 </div>
             </div>
