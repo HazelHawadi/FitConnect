@@ -58,31 +58,9 @@ def subscribe(request, plan_name):
 
 @login_required
 def manage_subscription(request):
-    subscription = Subscription.objects.filter(user=request.user).first()
-
-    cancellation_scheduled = False
-    if subscription and subscription.stripe_subscription_id:
-        try:
-            stripe_sub = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
-            cancellation_scheduled = stripe_sub.cancel_at_period_end
-            is_active = subscription.is_active()
-        except Exception as e:
-            messages.error(request, f"An error occurred: {e}")
-            is_active = False
-    else:
-        subscription = None
-        is_active = False
-
-    plan_name = subscription.plan_name if subscription else 'Basic'
-    subscribe_url = reverse('subscriptions:subscribe', kwargs={'plan_name': plan_name})
-
-    return render(request, 'subscriptions/manage_subscription.html', {
-        'subscription': subscription,
-        'is_active': is_active,
-        'subscribe_url': subscribe_url,
-        'today': timezone.now().date(),
-        'cancellation_scheduled': cancellation_scheduled,
-    })
+    context = get_user_subscription_context(request.user)
+    context["today"] = timezone.now().date()
+    return render(request, "subscriptions/manage_subscription.html", context)
 
 
 @csrf_exempt
@@ -167,6 +145,35 @@ def plan_benefits(plan_name):
     }.get(plan_name, [])
 
 
+def get_user_subscription_context(user):
+
+    subscription = Subscription.objects.filter(user=user).first()
+    cancellation_scheduled = False
+
+    if subscription and subscription.stripe_subscription_id:
+        try:
+            stripe_sub = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
+            cancellation_scheduled = stripe_sub.cancel_at_period_end
+            is_active = subscription.is_active()
+        except Exception:
+            is_active = False
+    else:
+        subscription = None
+        is_active = False
+
+    plan_name = subscription.plan_name if subscription else 'Basic'
+    subscribe_url = reverse('subscriptions:subscribe', kwargs={'plan_name': plan_name})
+
+    return {
+        "subscription": subscription,
+        "is_active": is_active,
+        "subscribe_url": subscribe_url,
+        "cancellation_scheduled": cancellation_scheduled,
+    }
+
+
+
+@login_required
 def pricing_view(request):
     plan_benefits = {
         'Basic': [
@@ -187,7 +194,11 @@ def pricing_view(request):
         ],
     }
 
-    return render(request, "subscriptions/pricing.html", {"plan_benefits": plan_benefits})
+    context = {"plan_benefits": plan_benefits}
+    context.update(get_user_subscription_context(request.user))
+
+    return render(request, "subscriptions/pricing.html", context)
+
 
 @login_required
 def subscription_success(request):
