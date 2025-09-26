@@ -30,7 +30,7 @@ if env_path.exists():
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -116,7 +116,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = False
 ACCOUNT_USERNAME_MIN_LENGTH = 4
-LOGIN_URL = 'home'
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = 'home'
 
 WSGI_APPLICATION = 'fitconnect.wsgi.application'
